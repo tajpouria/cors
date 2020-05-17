@@ -1,69 +1,84 @@
-import { Middleware, Response, HTTPMethods } from "./deps";
+import { Middleware, Response } from "./deps.ts";
 
 type CustomOrigin = (
-  requestOrigin: string | undefined,
+  requestOrigin: string | undefined | null,
   callback: (err: Error | null, allow?: boolean) => void,
 ) => void;
 
-export interface CorsOptions {
-  origin?: boolean | string | RegExp | (string | RegExp)[] | CustomOrigin;
-  methods?: HTTPMethods | HTTPMethods[];
-  allowedHeaders?: string | string[];
-  exposedHeaders?: string | string[];
-  credentials?: boolean;
-  maxAge?: number;
-  preflightContinue?: boolean;
-  optionsSuccessStatus?: number;
+interface DefaultCorsOptions {
+  origin: string;
+  methods: string;
+  preflightContinue: boolean;
+  optionsSuccessStatus: number;
 }
 
+export type CorsOptions = {
+  allowedHeaders?: string | string[];
+  credentials?: boolean;
+  exposedHeaders?: string | string[];
+  maxAge?: number;
+  methods?: string | string[];
+  optionsSuccessStatus?: number;
+  origin?: boolean | string | RegExp | (string | RegExp)[] | CustomOrigin;
+  preflightContinue?: boolean;
+};
+
 export type CorsOptionsDelegate = (
-  request: Response,
+  response: Response,
   callback: (error: Error | null, options?: CorsOptions) => void,
 ) => void;
 
-export default (options: CorsOptions | CorsOptionsDelegate): Middleware => {
+export default (options?: CorsOptions | CorsOptionsDelegate): Middleware => {
   let optionsCallback: CorsOptionsDelegate | null = null;
 
   if (typeof options === "function") optionsCallback = options;
   else
-    optionsCallback = ((request, cb) => {
-      cb(null, options);
+    optionsCallback = ((_, callback) => {
+      callback(null, options);
     }) as CorsOptionsDelegate;
 
   const corsMiddleware: Middleware = ({ request, response }, next) => {
-    optionsCallback(request, (err, options) => {
-      if (err) next(err);
+    optionsCallback!(response, (err, options) => {
+      if (err) next();
       else {
-        const defaults: CorsOptions = {
+        const defaultCorsOptions = {
           origin: "*",
           methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
           preflightContinue: false,
           optionsSuccessStatus: 204,
         };
 
-        const corsOptions = Object.assign({}, defaults, options);
-        // TODO: Type??
+        const corsOptions = Cors.produceCorsOptions(
+          defaultCorsOptions,
+          options,
+        );
         let originCallback = null;
 
         if (corsOptions.origin && typeof corsOptions.origin === "function")
           originCallback = corsOptions.origin;
         else if (corsOptions.origin)
-          originCallback = (origin, cb) => {
-            cb(null, !!corsOptions.origin);
+          originCallback = (origin: any, cb: any) => {
+            cb(null, corsOptions.origin);
           };
 
-        if (originCallback) {
-          originCallback(request.headers.origin, (err2, origin) => {
-            if (err2 || !origin) {
-              next(err2);
-            } else {
+        if (originCallback)
+          originCallback(response.headers.get("origin"), (err2, origin) => {
+            if (err2 || !origin) next();
+            else {
               corsOptions.origin = origin;
-              cors(corsOptions, request, response, next);
+
+              new Cors({
+                corsOptions,
+                requestMethod: request.method,
+                getHeader: (headerKey) => response.headers.get(headerKey),
+                setHeader: (headerKey, headerValue) =>
+                  response.headers.set(headerKey, headerValue),
+                setStatus: (statusCode) => (response.status = statusCode),
+                next,
+              }).action();
             }
           });
-        } else {
-          next();
-        }
+        else next();
       }
     });
   };
@@ -71,85 +86,226 @@ export default (options: CorsOptions | CorsOptionsDelegate): Middleware => {
   return corsMiddleware;
 };
 
-type Next = () => Promise<void>;
-interface HeaderKeyVal {
-  key: string;
-  value: string;
+interface CorsProps {
+  corsOptions: ReturnType<typeof Cors.produceCorsOptions>;
+  requestMethod: string;
+  getHeader: (headerKey: string) => any;
+  setHeader: (headerKey: string, headerValue: string) => any;
+  setStatus: (statusCode: number | number) => any;
+  next: (...args: any) => any;
 }
 
-function cors(
-  options: CorsOptions,
-  request: Response,
-  response: Response,
-  next: Next,
-): void {
-  const headers: HeaderKeyVal[] = [],
-    method =
-      request.method &&
-      request.method.toUpperCase &&
-      request.method.toUpperCase();
+class Cors {
+  constructor(private props: CorsProps) {}
 
-  if (method === "OPTIONS") {
-    // TODO: Make it not to push null
-    configureOrigin(options, request).forEach((h) => headers.push(h));
-    headers.push(configureCredentials(options));
-    headers.push(configureMethods(options));
-    configureAllowedHeaders(options, request).forEach((h) => headers.push(h));
-    headers.push(configureMaxAge(options));
-    headers.push(configureExposedHeaders(options));
-    applyHeaders(headers, response);
+  public static produceCorsOptions = (
+    defaultCorsOptions: DefaultCorsOptions,
+    corsOptions: CorsOptions = {},
+  ) => ({
+    ...defaultCorsOptions,
+    ...corsOptions,
+  });
 
-    if (options.preflightContinue) next();
-    else {
-      response.statusCode = options.optionsSuccessStatus;
-      response.setHeader("Content-Length", "0");
-      response.end();
+  public action = () => {
+    const {
+      props: { corsOptions, requestMethod, setHeader, setStatus, next },
+      configureOrigin,
+    } = this;
+
+    const method =
+      typeof requestMethod === "string" && requestMethod.toUpperCase();
+
+    if (method === "OPTIONS") {
+      configureOrigin()
+        .configureCredentials()
+        .configureMethods()
+        .configureAllowedHeaders()
+        .configureMaxAge()
+        .configureExposedHeaders();
+
+      if (corsOptions.preflightContinue) next();
+      else {
+        setStatus(corsOptions.optionsSuccessStatus);
+        setHeader("Content-Length", "0");
+      }
+    } else {
+      configureOrigin().configureCredentials().configureExposedHeaders();
+
+      next();
     }
-  } else {
-    configureOrigin(options, request).forEach((h) => headers.push(h));
-    headers.push(configureCredentials(options));
-    headers.push(configureExposedHeaders(options));
-    applyHeaders(headers, response);
-    next();
-  }
-}
+  };
 
-function configureOrigin(
-  options: CorsOptions,
-  response: Response,
-): HeaderKeyVal[] {
-  const responseOrigin: string | null = response.headers.get("origin");
-  const headers: HeaderKeyVal[] = [];
-  let isAllowed: boolean = false;
+  private configureOrigin = () => {
+    const { corsOptions, getHeader, setHeader } = this.props;
 
-  if (!options.origin || options.origin === "*") {
-    headers.push({
-      key: "Access-Control-Allow-Origin",
-      value: "*",
-    });
-  } else if (typeof options.origin === "string") {
-    headers.push({
-      key: "Access-Control-Allow-Origin",
-      value: options.origin,
-    });
-    headers.push({
-      key: "Vary",
-      value: "Origin",
-    });
-  } else {
-    isAllowed = isOriginAllowed(responseOrigin, options.origin);
+    const responseOrigin = getHeader("origin");
+    let isAllowed: boolean = false;
 
-    headers.push({
-      key: "Access-Control-Allow-Origin",
-      value: isAllowed ? responseOrigin : "false",
-    });
-    headers.push({
-      key: "Vary",
-      value: "Origin",
-    });
-  }
+    if (!corsOptions.origin || corsOptions.origin === "*") {
+      setHeader("Access-Control-Allow-Origin", "*");
+    } else if (typeof corsOptions.origin === "string") {
+      setHeader("Access-Control-Allow-Origin", corsOptions.origin);
+      setHeader("Vary", "Origin");
+    } else {
+      isAllowed = isOriginAllowed(responseOrigin, corsOptions.origin);
 
-  return headers;
+      setHeader(
+        "Access-Control-Allow-Origin",
+        isAllowed ? (responseOrigin as string) : "false",
+      );
+      setHeader("Vary", "Origin");
+    }
+
+    return this;
+  };
+
+  private configureCredentials = () => {
+    const { corsOptions, setHeader } = this.props;
+
+    if (corsOptions.credentials === true)
+      setHeader("Access-Control-Allow-Credentials", "true");
+
+    return this;
+  };
+
+  private configureMethods = () => {
+    const { corsOptions, setHeader } = this.props;
+
+    let methods = corsOptions.methods;
+
+    setHeader(
+      "Access-Control-Allow-Methods",
+      Array.isArray(methods) ? methods.join(",") : methods,
+    );
+
+    return this;
+  };
+
+  private configureAllowedHeaders = () => {
+    const {
+      props: { corsOptions, getHeader, setHeader },
+      setVaryHeader,
+    } = this;
+
+    const responseAllowedHeaders = getHeader("access-control-request-headers");
+    let allowedHeaders = corsOptions.allowedHeaders;
+
+    if (!allowedHeaders) {
+      allowedHeaders = responseAllowedHeaders;
+
+      setVaryHeader("Access-Control-request-Headers");
+    }
+
+    if (allowedHeaders?.length) {
+      setHeader(
+        "Access-Control-Allow-Headers",
+        Array.isArray(allowedHeaders)
+          ? allowedHeaders.join(",")
+          : allowedHeaders,
+      );
+    }
+
+    return this;
+  };
+
+  private configureMaxAge = () => {
+    const { corsOptions, setHeader } = this.props;
+
+    const maxAge =
+      (typeof corsOptions.maxAge === "number" ||
+        typeof corsOptions.maxAge === "string") &&
+      corsOptions.maxAge.toString();
+
+    if (maxAge && maxAge.length) setHeader("Access-Control-Max-Age", maxAge);
+
+    return this;
+  };
+
+  private setVaryHeader = (field: string) => {
+    const {
+      props: { getHeader, setHeader },
+      appendVaryHeader,
+    } = this;
+
+    let existingHeader = getHeader("Vary") || "";
+
+    if (
+      (existingHeader = appendVaryHeader(
+        Array.isArray(existingHeader)
+          ? existingHeader.join(", ")
+          : existingHeader,
+        field,
+      ))
+    )
+      setHeader("Vary", existingHeader);
+  };
+
+  private configureExposedHeaders = () => {
+    const { corsOptions, setHeader } = this.props;
+
+    let exposedHeaders = corsOptions.exposedHeaders;
+
+    if (exposedHeaders?.length)
+      setHeader(
+        "Access-Control-Expose-Headers",
+        Array.isArray(exposedHeaders)
+          ? exposedHeaders.join(",")
+          : exposedHeaders,
+      );
+
+    return this;
+  };
+
+  appendVaryHeader = (header: string, field: string | string[]) => {
+    const { parseVaryHeader } = this;
+
+    if (header === "*") return header;
+
+    let headerTemp = header;
+    const fields = Array.isArray(field) ? field : parseVaryHeader(field);
+
+    if (fields.includes("*")) return "*";
+
+    var currentValues = parseVaryHeader(header.toLowerCase());
+
+    fields.forEach((field, i) => {
+      var fld = field.toLowerCase();
+
+      if (currentValues.includes(fld)) {
+        currentValues.push(fld);
+        headerTemp = headerTemp ? `${headerTemp}, ${field}` : field;
+      }
+    });
+
+    return headerTemp;
+  };
+
+  parseVaryHeader = (header: string) => {
+    let end = 0;
+    const list = [];
+    let start = 0;
+
+    for (let i = 0; i < header.length; i++) {
+      switch (header.charCodeAt(i)) {
+        case 0x20 /*   */:
+          if (start === end) {
+            start = end = i + 1;
+          }
+          break;
+        case 0x2c /* , */:
+          list.push(header.substring(start, end));
+          start = end = i + 1;
+          break;
+        default:
+          end = i + 1;
+          break;
+      }
+    }
+
+    list.push(header.substring(start, end));
+
+    return list;
+  };
 }
 
 function isOriginAllowed(
@@ -159,90 +315,7 @@ function isOriginAllowed(
   if (Array.isArray(allowedOrigin))
     return allowedOrigin.some((ao) => isOriginAllowed(origin, ao));
   else if (typeof allowedOrigin === "string") return origin === allowedOrigin;
-  else if (allowedOrigin instanceof RegExp) return allowedOrigin.test(origin);
+  else if (allowedOrigin instanceof RegExp)
+    return allowedOrigin.test(origin as string);
   else return !!allowedOrigin;
-}
-
-function configureCredentials(options: CorsOptions): HeaderKeyVal {
-  if (options.credentials === true)
-    return {
-      key: "Access-Control-Allow-Credentials",
-      value: "true",
-    };
-
-  return null;
-}
-
-function configureMethods(options: CorsOptions): HeaderKeyVal {
-  let methods = options.methods;
-  if (Array.isArray(methods)) methods = options.methods.join(",");
-
-  return {
-    key: "Access-Control-Allow-Methods",
-    value: methods,
-  };
-}
-
-function configureAllowedHeaders(
-  options: CorsOptions,
-  response: Response,
-): HeaderKeyVal[] {
-  let allowedHeaders = options.allowedHeaders;
-  const headers: HeaderKeyVal[] = [];
-
-  if (!allowedHeaders) {
-    allowedHeaders = response.headers.get("access-control-request-headers");
-    headers.push({
-      key: "Vary",
-      value: "Access-Control-request-Headers",
-    });
-  } else if (Array.isArray(allowedHeaders))
-    allowedHeaders = allowedHeaders.join(",");
-
-  if (allowedHeaders && allowedHeaders.length) {
-    headers.push({
-      key: "Access-Control-Allow-Headers",
-      value: allowedHeaders as string,
-    });
-  }
-
-  return headers;
-}
-
-function configureMaxAge(options: CorsOptions): HeaderKeyVal {
-  const maxAge =
-    (typeof options.maxAge === "number" || options.maxAge) &&
-    options.maxAge.toString();
-
-  if (maxAge && maxAge.length)
-    return {
-      key: "Access-Control-Max-Age",
-      value: maxAge,
-    };
-
-  return null;
-}
-
-function configureExposedHeaders(options: CorsOptions): HeaderKeyVal {
-  let headers = options.exposedHeaders;
-  if (!headers) return null;
-  else if (Array.isArray(headers)) headers = headers.join(",");
-
-  if (headers && headers.length)
-    return {
-      key: "Access-Control-Expose-Headers",
-      value: headers,
-    };
-
-  return null;
-}
-
-function applyHeaders(headers: HeaderKeyVal[], response: Response): void {
-  headers.forEach((h) => {
-    if (h.key === "Vary" && h.value) {
-      vary(response, h.value);
-    } else if (h.value) {
-      response.setHeader(h.key, h.value);
-    }
-  });
 }
