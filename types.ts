@@ -1,6 +1,9 @@
 export type OriginDelegate = (
   requestOrigin: string | undefined | null,
-  callback: (err: Error | null, allow?: CorsOptions["origin"]) => void,
+  callback: (
+    err: Error | null | undefined,
+    allow?: CorsOptions["origin"],
+  ) => void,
 ) => void;
 
 export type CorsOptions = {

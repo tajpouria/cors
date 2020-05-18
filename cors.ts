@@ -35,12 +35,12 @@ export class Cors {
   public static produceOptionsCallback = <
     OptionsCallbackT = CorsOptionsDelegate<any>
   >(
-    corsOptions?: CorsOptions | OptionsCallbackT,
+    o?: CorsOptions | OptionsCallbackT,
   ) =>
-    typeof corsOptions === "function"
-      ? (corsOptions as OptionsCallbackT)
-      : ((((_: any, callback: any) => {
-          callback(null, corsOptions);
+    typeof o === "function"
+      ? (o as OptionsCallbackT)
+      : ((((_r: any, callback: any) => {
+          callback(null, o);
         }) as unknown) as OptionsCallbackT);
 
   public static produceOriginCallback = (
@@ -50,7 +50,7 @@ export class Cors {
       if (typeof corsOptions.origin === "function")
         return corsOptions.origin as OriginDelegate;
 
-      return ((_, callback) => {
+      return ((_origin, callback) => {
         callback(null, corsOptions.origin);
       }) as OriginDelegate;
     }
@@ -63,8 +63,8 @@ export class Cors {
     if (Array.isArray(allowedOrigin))
       return allowedOrigin.some((ao) => Cors.isOriginAllowed(origin, ao));
     else if (typeof allowedOrigin === "string") return origin === allowedOrigin;
-    else if (allowedOrigin instanceof RegExp)
-      return allowedOrigin.test(origin as string);
+    else if (allowedOrigin instanceof RegExp && typeof origin === "string")
+      return allowedOrigin.test(origin);
     else return !!allowedOrigin;
   };
 
@@ -74,10 +74,10 @@ export class Cors {
       configureOrigin,
     } = this;
 
-    const method =
-      typeof requestMethod === "string" && requestMethod.toUpperCase();
-
-    if (method === "OPTIONS") {
+    if (
+      requestMethod === "string" &&
+      requestMethod.toUpperCase() === "OPTIONS"
+    ) {
       configureOrigin()
         .configureCredentials()
         .configureMethods()
@@ -89,6 +89,7 @@ export class Cors {
       else {
         setStatus(corsOptions.optionsSuccessStatus);
         setHeader("Content-Length", "0");
+        next();
       }
     } else {
       configureOrigin().configureCredentials().configureExposedHeaders();
@@ -98,24 +99,26 @@ export class Cors {
   };
 
   private configureOrigin = () => {
-    const { corsOptions, getHeader, setHeader } = this.props;
+    const {
+      props: { corsOptions, getHeader, setHeader },
+      setVaryHeader,
+    } = this;
 
-    const responseOrigin = getHeader("origin");
-    let isAllowed: boolean = false;
+    const requestOrigin = getHeader("origin") ?? getHeader("Origin");
 
     if (!corsOptions.origin || corsOptions.origin === "*")
       setHeader("Access-Control-Allow-Origin", "*");
     else if (typeof corsOptions.origin === "string") {
       setHeader("Access-Control-Allow-Origin", corsOptions.origin);
-      setHeader("Vary", "Origin");
+      setVaryHeader("Origin");
     } else {
-      isAllowed = Cors.isOriginAllowed(responseOrigin, corsOptions.origin);
-
       setHeader(
         "Access-Control-Allow-Origin",
-        isAllowed ? (responseOrigin as string) : "false",
+        Cors.isOriginAllowed(requestOrigin, corsOptions.origin)
+          ? (requestOrigin as string)
+          : "false",
       );
-      setHeader("Vary", "Origin");
+      setVaryHeader("Origin");
     }
 
     return this;
@@ -149,23 +152,24 @@ export class Cors {
       setVaryHeader,
     } = this;
 
-    const responseAllowedHeaders = getHeader("access-control-request-headers");
     let allowedHeaders = corsOptions.allowedHeaders;
 
     if (!allowedHeaders) {
-      allowedHeaders = responseAllowedHeaders ?? undefined;
+      allowedHeaders =
+        getHeader("access-control-request-headers") ??
+        getHeader("Access-Control-Request-Headers") ??
+        undefined;
 
       setVaryHeader("Access-Control-request-Headers");
     }
 
-    if (allowedHeaders?.length) {
+    if (allowedHeaders?.length)
       setHeader(
         "Access-Control-Allow-Headers",
         Array.isArray(allowedHeaders)
           ? allowedHeaders.join(",")
           : allowedHeaders,
       );
-    }
 
     return this;
   };
@@ -181,25 +185,6 @@ export class Cors {
     if (maxAge && maxAge.length) setHeader("Access-Control-Max-Age", maxAge);
 
     return this;
-  };
-
-  private setVaryHeader = (field: string) => {
-    const {
-      props: { getHeader, setHeader },
-      appendVaryHeader,
-    } = this;
-
-    let existingHeader = getHeader("Vary") || "";
-
-    if (
-      (existingHeader = appendVaryHeader(
-        Array.isArray(existingHeader)
-          ? existingHeader.join(", ")
-          : existingHeader,
-        field,
-      ))
-    )
-      setHeader("Vary", existingHeader);
   };
 
   private configureExposedHeaders = () => {
@@ -218,28 +203,43 @@ export class Cors {
     return this;
   };
 
-  private appendVaryHeader = (header: string, field: string | string[]) => {
+  private setVaryHeader = (field: string) => {
+    const {
+      props: { getHeader, setHeader },
+      appendVaryHeader,
+    } = this;
+
+    let existingHeader = getHeader("Vary") ?? "";
+
+    if (
+      existingHeader &&
+      typeof existingHeader === "string" &&
+      (existingHeader = appendVaryHeader(existingHeader, field))
+    )
+      setHeader("Vary", existingHeader);
+  };
+
+  private appendVaryHeader = (header: string, field: string) => {
     const { parseVaryHeader } = this;
 
     if (header === "*") return header;
 
-    let headerTemp = header;
-    const fields = Array.isArray(field) ? field : parseVaryHeader(field);
+    let varyHeader = header;
+    const fields = parseVaryHeader(field);
+    const headers = parseVaryHeader(header.toLocaleLowerCase());
 
-    if (fields.includes("*")) return "*";
-
-    const currentValues = parseVaryHeader(header.toLowerCase());
+    if (fields.includes("*") || headers.includes("*")) return "*";
 
     fields.forEach((field) => {
       const fld = field.toLowerCase();
 
-      if (currentValues.includes(fld)) {
-        currentValues.push(fld);
-        headerTemp = headerTemp ? `${headerTemp}, ${field}` : field;
+      if (headers.includes(fld)) {
+        headers.push(fld);
+        varyHeader = varyHeader ? `${varyHeader}, ${field}` : field;
       }
     });
 
-    return headerTemp;
+    return varyHeader;
   };
 
   private parseVaryHeader = (header: string) => {
@@ -247,12 +247,10 @@ export class Cors {
     const list = [];
     let start = 0;
 
-    for (let i = 0; i < header.length; i++) {
+    for (let i = 0, len = header.length; i < len; i++) {
       switch (header.charCodeAt(i)) {
         case 0x20 /*   */:
-          if (start === end) {
-            start = end = i + 1;
-          }
+          if (start === end) start = end = i + 1;
           break;
         case 0x2c /* , */:
           list.push(header.substring(start, end));

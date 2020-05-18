@@ -6,15 +6,15 @@ import { Cors } from "./cors.ts";
 export type OakCorsOptionsDelegate = CorsOptionsDelegate<OakResponse>;
 
 export const oakCors = (
-  corsOptions?: CorsOptions | OakCorsOptionsDelegate,
+  o?: CorsOptions | OakCorsOptionsDelegate,
 ): OakMiddleware => {
   const optionsCallback = Cors.produceOptionsCallback<OakCorsOptionsDelegate>(
-    corsOptions,
+    o,
   );
 
   return ({ request, response }, next) => {
-    optionsCallback(response, (err, options) => {
-      if (err) next();
+    optionsCallback(response, (optionsError, options) => {
+      if (optionsError) next();
       else {
         const corsOptions = Cors.produceCorsOptions(options);
         const originCallback = Cors.produceOriginCallback(corsOptions);
@@ -29,9 +29,9 @@ export const oakCors = (
             (response.status = statusCode);
 
           originCallback(
-            getHeader("origin") || getHeader("Origin"),
-            (err2, origin) => {
-              if (err2 || !origin) next();
+            getHeader("origin") ?? getHeader("Origin"),
+            (originError, origin) => {
+              if (originError || !origin) next();
               else {
                 corsOptions.origin = origin;
 
