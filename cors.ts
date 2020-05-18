@@ -10,8 +10,9 @@ interface DefaultCorsOptions {
 interface CorsProps {
   corsOptions: ReturnType<typeof Cors.produceCorsOptions>;
   requestMethod: string;
-  getHeader: (headerKey: string) => string | null | undefined;
-  setHeader: (headerKey: string, headerValue: string) => any;
+  getRequestHeader: (headerKey: string) => string | null | undefined;
+  getResponseHeader: (headerKey: string) => string | null | undefined;
+  setResponseHeader: (headerKey: string, headerValue: string) => any;
   setStatus: (statusCode: number) => any;
   next: (...args: any) => any;
 }
@@ -70,7 +71,7 @@ export class Cors {
 
   public configureHeaders = () => {
     const {
-      props: { corsOptions, requestMethod, setHeader, setStatus, next },
+      props: { corsOptions, requestMethod, setResponseHeader, setStatus, next },
       configureOrigin,
     } = this;
 
@@ -88,7 +89,7 @@ export class Cors {
       if (corsOptions.preflightContinue) next();
       else {
         setStatus(corsOptions.optionsSuccessStatus);
-        setHeader("Content-Length", "0");
+        setResponseHeader("Content-Length", "0");
         next();
       }
     } else {
@@ -100,19 +101,19 @@ export class Cors {
 
   private configureOrigin = () => {
     const {
-      props: { corsOptions, getHeader, setHeader },
+      props: { corsOptions, getRequestHeader, setResponseHeader },
       setVaryHeader,
     } = this;
 
-    const requestOrigin = getHeader("origin") ?? getHeader("Origin");
+    const requestOrigin = getRequestHeader("origin");
 
     if (!corsOptions.origin || corsOptions.origin === "*")
-      setHeader("Access-Control-Allow-Origin", "*");
+      setResponseHeader("Access-Control-Allow-Origin", "*");
     else if (typeof corsOptions.origin === "string") {
-      setHeader("Access-Control-Allow-Origin", corsOptions.origin);
+      setResponseHeader("Access-Control-Allow-Origin", corsOptions.origin);
       setVaryHeader("Origin");
     } else {
-      setHeader(
+      setResponseHeader(
         "Access-Control-Allow-Origin",
         Cors.isOriginAllowed(requestOrigin, corsOptions.origin)
           ? (requestOrigin as string)
@@ -125,20 +126,20 @@ export class Cors {
   };
 
   private configureCredentials = () => {
-    const { corsOptions, setHeader } = this.props;
+    const { corsOptions, setResponseHeader } = this.props;
 
     if (corsOptions.credentials === true)
-      setHeader("Access-Control-Allow-Credentials", "true");
+      setResponseHeader("Access-Control-Allow-Credentials", "true");
 
     return this;
   };
 
   private configureMethods = () => {
-    const { corsOptions, setHeader } = this.props;
+    const { corsOptions, setResponseHeader } = this.props;
 
     let methods = corsOptions.methods;
 
-    setHeader(
+    setResponseHeader(
       "Access-Control-Allow-Methods",
       Array.isArray(methods) ? methods.join(",") : methods,
     );
@@ -148,7 +149,7 @@ export class Cors {
 
   private configureAllowedHeaders = () => {
     const {
-      props: { corsOptions, getHeader, setHeader },
+      props: { corsOptions, getRequestHeader, setResponseHeader },
       setVaryHeader,
     } = this;
 
@@ -156,15 +157,15 @@ export class Cors {
 
     if (!allowedHeaders) {
       allowedHeaders =
-        getHeader("access-control-request-headers") ??
-        getHeader("Access-Control-Request-Headers") ??
+        getRequestHeader("access-control-request-headers") ??
+        getRequestHeader("Access-Control-Request-Headers") ??
         undefined;
 
       setVaryHeader("Access-Control-request-Headers");
     }
 
     if (allowedHeaders?.length)
-      setHeader(
+      setResponseHeader(
         "Access-Control-Allow-Headers",
         Array.isArray(allowedHeaders)
           ? allowedHeaders.join(",")
@@ -175,25 +176,26 @@ export class Cors {
   };
 
   private configureMaxAge = () => {
-    const { corsOptions, setHeader } = this.props;
+    const { corsOptions, setResponseHeader } = this.props;
 
     const maxAge =
       (typeof corsOptions.maxAge === "number" ||
         typeof corsOptions.maxAge === "string") &&
       corsOptions.maxAge.toString();
 
-    if (maxAge && maxAge.length) setHeader("Access-Control-Max-Age", maxAge);
+    if (maxAge && maxAge.length)
+      setResponseHeader("Access-Control-Max-Age", maxAge);
 
     return this;
   };
 
   private configureExposedHeaders = () => {
-    const { corsOptions, setHeader } = this.props;
+    const { corsOptions, setResponseHeader } = this.props;
 
     let exposedHeaders = corsOptions.exposedHeaders;
 
     if (exposedHeaders?.length)
-      setHeader(
+      setResponseHeader(
         "Access-Control-Expose-Headers",
         Array.isArray(exposedHeaders)
           ? exposedHeaders.join(",")
@@ -205,18 +207,18 @@ export class Cors {
 
   private setVaryHeader = (field: string) => {
     const {
-      props: { getHeader, setHeader },
+      props: { getResponseHeader, setResponseHeader },
       appendVaryHeader,
     } = this;
 
-    let existingHeader = getHeader("Vary") ?? "";
+    let existingHeader = getResponseHeader("Vary") ?? "";
 
     if (
       existingHeader &&
       typeof existingHeader === "string" &&
       (existingHeader = appendVaryHeader(existingHeader, field))
     )
-      setHeader("Vary", existingHeader);
+      setResponseHeader("Vary", existingHeader);
   };
 
   private appendVaryHeader = (header: string, field: string) => {

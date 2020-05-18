@@ -21,31 +21,31 @@ export const oakCors = (
 
         if (originCallback) {
           const requestMethod = request.method;
-          const getHeader = (headerKey: string) =>
-            response.headers.get(headerKey);
-          const setHeader = (headerKey: string, headerValue: string) =>
+          const getRequestHeader = (headerKey: string) =>
+            request.headers.get(headerKey);
+          const getResponseHeader = (headerKey: string) =>
+            request.headers.get(headerKey);
+          const setResponseHeader = (headerKey: string, headerValue: string) =>
             response.headers.set(headerKey, headerValue);
           const setStatus = (statusCode: number) =>
             (response.status = statusCode);
 
-          originCallback(
-            getHeader("origin") ?? getHeader("Origin"),
-            (originError, origin) => {
-              if (originError || !origin) next();
-              else {
-                corsOptions.origin = origin;
+          originCallback(getRequestHeader("origin"), (originError, origin) => {
+            if (originError || !origin) next();
+            else {
+              corsOptions.origin = origin;
 
-                new Cors({
-                  corsOptions,
-                  requestMethod,
-                  getHeader,
-                  setHeader,
-                  setStatus,
-                  next,
-                }).configureHeaders();
-              }
-            },
-          );
+              new Cors({
+                corsOptions,
+                requestMethod,
+                getRequestHeader,
+                getResponseHeader,
+                setResponseHeader,
+                setStatus,
+                next,
+              }).configureHeaders();
+            }
+          });
         } else next();
       }
     });
