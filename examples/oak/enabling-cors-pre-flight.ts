@@ -10,10 +10,8 @@ books.set("1", {
 
 const router = new Router();
 router
-  .get("/book", oakCors(), (context) => { // Enable CORS for a Single Route
-    context.response.body = Array.from(books.values());
-  })
-  .get("/book/:id", (context) => {
+  .options("/book/:id", oakCors()) // enable pre-flight request for OPTIONS request
+  .delete("/book/:id", oakCors(), (context) => {
     if (context.params && context.params.id && books.has(context.params.id)) {
       context.response.body = books.get(context.params.id);
     }

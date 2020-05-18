@@ -76,7 +76,7 @@ export class Cors {
     } = this;
 
     if (
-      requestMethod === "string" &&
+      typeof requestMethod === "string" &&
       requestMethod.toUpperCase() === "OPTIONS"
     ) {
       configureOrigin()

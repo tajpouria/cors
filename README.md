@@ -24,8 +24,8 @@ import { oakCors } from "https://deno.land/x/cors/mod.ts";
 const books = new Map<string, any>();
 books.set("1", {
   id: "1",
-  title: "The Hound of the Baskervilles",
-  author: "Conan Doyle, Author",
+  title: "Frankenstein",
+  author: "Mary Shelley",
 });
 
 const router = new Router();
@@ -61,8 +61,8 @@ import { oakCors } from "https://deno.land/x/cors/mod.ts";
 const books = new Map<string, any>();
 books.set("1", {
   id: "1",
-  title: "The Hound of the Baskervilles",
-  author: "Conan Doyle, Author",
+  title: "Frankenstein",
+  author: "Mary Shelley",
 });
 
 const router = new Router();
@@ -95,8 +95,8 @@ import { oakCors } from "https://deno.land/x/cors/mod.ts";
 const books = new Map<string, any>();
 books.set("1", {
   id: "1",
-  title: "The Hound of the Baskervilles",
-  author: "Conan Doyle, Author",
+  title: "Frankenstein",
+  author: "Mary Shelley",
 });
 
 const router = new Router();
@@ -107,7 +107,7 @@ router.get("/book", (context) => {
 const app = new Application();
 app.use(
   oakCors({
-    origin: /^.+localhost:(3000|1234)$/,
+    origin: /^.+localhost:(1234|3000)$/,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   }),
 );
@@ -130,7 +130,7 @@ option of the middleware, except a function. See the
 the possible value types.
 
 This function is designed to allow the dynamic loading of allowed origin(s) from
-a backing datasource, like a database.
+a backing dataSource, like a database.
 
 #### Oak
 
@@ -141,8 +141,8 @@ import { oakCors } from "https://deno.land/x/cors/mod.ts";
 const books = new Map<string, any>();
 books.set("1", {
   id: "1",
-  title: "The Hound of the Baskervilles",
-  author: "Conan Doyle, Author",
+  title: "Frankenstein",
+  author: "Mary Shelley",
 });
 
 const corsOptions = {
@@ -163,7 +163,23 @@ router.get("/book", oakCors(corsOptions), (context) => {
 
 const app = new Application();
 app.use(router.routes());
+
+console.info(`CORS-enabled web server listening on port 8000`);
 await app.listen({ port: 8000 });
+```
+
+If you do not want to block REST tools or server-to-server requests, add a !origin check in the origin function like so:
+
+```typescript
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || !whitelist.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
 ```
 
 ### Enabling CORS Pre-Flight
@@ -184,20 +200,28 @@ import { oakCors } from "https://deno.land/x/cors/mod.ts";
 const books = new Map<string, any>();
 books.set("1", {
   id: "1",
-  title: "The Hound of the Baskervilles",
-  author: "Conan Doyle, Author",
+  title: "Frankenstein",
+  author: "Mary Shelley",
 });
 
 const router = new Router();
-router.delete("/book", oakCors()); // enable pre-flight request for DELETE request
+router
+  .options("/book/:id", oakCors()) // enable pre-flight request for OPTIONS request
+  .delete("/book/:id", oakCors(), (context) => {
+    if (context.params && context.params.id && books.has(context.params.id)) {
+      context.response.body = books.get(context.params.id);
+    }
+  });
 
 const app = new Application();
 app.use(router.routes());
+
+console.info(`CORS-enabled web server listening on port 8000`);
 await app.listen({ port: 8000 });
 ```
 
 NOTE: When using this middleware as an application level middleware (for
-example, `app.use(cors())`), pre-flight requests are already handled for all
+example, `app.use(oakCors())`), pre-flight requests are already handled for all
 routes.
 
 ### Configuring CORS Asynchronously
@@ -211,34 +235,35 @@ import { oakCors } from "https://deno.land/x/cors/mod.ts";
 const books = new Map<string, any>();
 books.set("1", {
   id: "1",
-  title: "The Hound of the Baskervilles",
-  author: "Conan Doyle, Author",
+  title: "Frankenstein",
+  author: "Mary Shelley",
 });
 
-const whitelist = ["http://example1.com", "http://example2.com"];
+const whitelist = ["http://localhost:1234", "http://localhost:3000"];
 
-const corsOptionsDelegate = (req, callback) => {
-  const corsOptions;
-  if (whitelist.indexOf(req.header("Origin")) !== -1) {
+const corsOptionsDelegate: OakCorsOptionsDelegate = (request, callback) => {
+  let corsOptions: CorsOptions = {};
+  if (whitelist.includes(request.headers.get("origin") ?? "")) {
     corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
   } else {
     corsOptions = { origin: false }; // disable CORS for this request
   }
+
   callback(null, corsOptions); // callback expects two parameters: error and options
 };
 
 const router = new Router();
-router
-  .get("/book/:id", oakCors(corsOptionsDelegate), oakCors(), (context) => {
-    if (context.params && context.params.id && books.has(context.params.id)) {
-      context.response.body = books.get(context.params.id);
-    }
-  )
+router.get("/book/:id", oakCors(corsOptionsDelegate), (context) => {
+  if (context.params && context.params.id && books.has(context.params.id)) {
+    context.response.body = books.get(context.params.id);
+  }
+});
 
 const app = new Application();
 app.use(router.routes());
-await app.listen({ port: 8000 });
 
+console.info(`CORS-enabled web server listening on port 8000`);
+await app.listen({ port: 8000 });
 ```
 
 ## Configuration Options
@@ -268,8 +293,6 @@ The default configuration is the equivalent of:
 }
 ```
 
-For details on the effect of each CORS header, read [this](http://www.html5rocks.com/en/tutorials/cors/) article on HTML5 Rocks.
-
 ## License
 
-[MIT License](http://www.opensource.org/licenses/mit-license.php)
+[MIT License](LICENSE)

@@ -1,9 +1,9 @@
-import { OakMiddleware, OakResponse } from "./deps.ts";
+import { OakMiddleware, OakRequest } from "./deps.ts";
 
 import { CorsOptions, CorsOptionsDelegate } from "./types.ts";
 import { Cors } from "./cors.ts";
 
-export type OakCorsOptionsDelegate = CorsOptionsDelegate<OakResponse>;
+export type OakCorsOptionsDelegate = CorsOptionsDelegate<OakRequest>;
 
 export const oakCors = (
   o?: CorsOptions | OakCorsOptionsDelegate,
@@ -13,7 +13,8 @@ export const oakCors = (
   );
 
   return ({ request, response }, next) => {
-    optionsCallback(response, (optionsError, options) => {
+    optionsCallback(request, (optionsError, options) => {
+      debugger;
       if (optionsError) next();
       else {
         const corsOptions = Cors.produceCorsOptions(options);
