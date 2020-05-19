@@ -29,5 +29,4 @@ app.use(oakCors()); // Enable All CORS Requests
 app.use(router.routes());
 
 console.info(`CORS-enabled web server listening on port 8000`);
-
 await app.listen({ port: 8000 });

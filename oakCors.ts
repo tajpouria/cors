@@ -5,12 +5,17 @@ import { Cors } from "./cors.ts";
 
 export type OakCorsOptionsDelegate = CorsOptionsDelegate<OakRequest>;
 
+/**
+ * OakCors middleware
+ * @param o CorsOptions | OakCorsOptionsDelegate
+ * @link https://github.com/tajpouria/cors/blob/master/README.md#cors
+ */
 export const oakCors = (
   o?: CorsOptions | OakCorsOptionsDelegate,
 ): OakMiddleware => {
-  const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<OakCorsOptionsDelegate>(
-    o,
-  );
+  const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
+    OakCorsOptionsDelegate
+  >(o);
 
   return async ({ request, response }, next) => {
     try {
@@ -24,7 +29,7 @@ export const oakCors = (
         const getRequestHeader = (headerKey: string) =>
           request.headers.get(headerKey);
         const getResponseHeader = (headerKey: string) =>
-          request.headers.get(headerKey);
+          response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
         const setStatus = (statusCode: number) =>
