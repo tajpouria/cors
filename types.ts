@@ -1,11 +1,3 @@
-export type OriginDelegate = (
-  requestOrigin: string | undefined | null,
-  callback: (
-    err: Error | null | undefined,
-    allow?: CorsOptions["origin"],
-  ) => void,
-) => void;
-
 export type CorsOptions = {
   allowedHeaders?: string | string[];
   credentials?: boolean;
@@ -17,7 +9,10 @@ export type CorsOptions = {
   preflightContinue?: boolean;
 };
 
-export type CorsOptionsDelegate<RT> = (
-  r: RT,
-  callback: (error: Error | null, options?: CorsOptions) => void,
-) => void;
+export type OriginDelegate = (
+  requestOrigin: string | undefined | null,
+) => CorsOptions["origin"] | void | Promise<CorsOptions["origin"] | void>;
+
+export type CorsOptionsDelegate<RequestT = any> = (
+  request: RequestT,
+) => CorsOptions | void | Promise<CorsOptions | void>;

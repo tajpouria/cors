@@ -33,39 +33,41 @@ export class Cors {
     ...corsOptions,
   });
 
-  public static produceOptionsCallback = <
+  public static produceCorsOptionsDelegate = <
     OptionsCallbackT = CorsOptionsDelegate<any>
   >(
     o?: CorsOptions | OptionsCallbackT,
   ) =>
     typeof o === "function"
       ? (o as OptionsCallbackT)
-      : ((((_r: any, callback: any) => {
-          callback(null, o);
-        }) as unknown) as OptionsCallbackT);
+      : ((((_request: any) => o) as unknown) as OptionsCallbackT);
 
-  public static produceOriginCallback = (
+  public static produceOriginDelegate = (
     corsOptions: CorsProps["corsOptions"],
   ) => {
     if (corsOptions.origin) {
       if (typeof corsOptions.origin === "function")
         return corsOptions.origin as OriginDelegate;
 
-      return ((_origin, callback) => {
-        callback(null, corsOptions.origin);
-      }) as OriginDelegate;
+      return ((_requestOrigin) => corsOptions.origin) as OriginDelegate;
     }
   };
 
   public static isOriginAllowed = (
-    origin: string | null | undefined,
+    requestOrigin: string | null | undefined,
     allowedOrigin: CorsOptions["origin"],
   ): boolean => {
     if (Array.isArray(allowedOrigin))
-      return allowedOrigin.some((ao) => Cors.isOriginAllowed(origin, ao));
-    else if (typeof allowedOrigin === "string") return origin === allowedOrigin;
-    else if (allowedOrigin instanceof RegExp && typeof origin === "string")
-      return allowedOrigin.test(origin);
+      return allowedOrigin.some((ao) =>
+        Cors.isOriginAllowed(requestOrigin, ao),
+      );
+    else if (typeof allowedOrigin === "string")
+      return requestOrigin === allowedOrigin;
+    else if (
+      allowedOrigin instanceof RegExp &&
+      typeof requestOrigin === "string"
+    )
+      return allowedOrigin.test(requestOrigin);
     else return !!allowedOrigin;
   };
 
@@ -105,14 +107,15 @@ export class Cors {
       setVaryHeader,
     } = this;
 
-    const requestOrigin = getRequestHeader("origin");
-
     if (!corsOptions.origin || corsOptions.origin === "*")
       setResponseHeader("Access-Control-Allow-Origin", "*");
     else if (typeof corsOptions.origin === "string") {
       setResponseHeader("Access-Control-Allow-Origin", corsOptions.origin);
       setVaryHeader("Origin");
     } else {
+      const requestOrigin =
+        getRequestHeader("origin") ?? getRequestHeader("Origin");
+
       setResponseHeader(
         "Access-Control-Allow-Origin",
         Cors.isOriginAllowed(requestOrigin, corsOptions.origin)

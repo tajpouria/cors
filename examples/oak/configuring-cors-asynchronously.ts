@@ -1,5 +1,10 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { oakCors, OakCorsOptionsDelegate, CorsOptions } from "../../mod.ts";
+import { oakCors, OakCorsOptionsDelegate } from "../../mod.ts";
+
+const sleep = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -8,17 +13,16 @@ books.set("1", {
   author: "Mary Shelley",
 });
 
-const whitelist = ["http://localhost:1234", "http://localhost:3000"];
+const whitelist = ["http://localhost:123", "http://localhost:3000"];
 
-const corsOptionsDelegate: OakCorsOptionsDelegate = (request, callback) => {
-  let corsOptions: CorsOptions = {};
-  if (whitelist.includes(request.headers.get("origin") ?? "")) {
-    corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
-  } else {
-    corsOptions = { origin: false }; // disable CORS for this request
-  }
+const corsOptionsDelegate: OakCorsOptionsDelegate = async (request) => {
+  const isOriginAllowed = whitelist.includes(
+    request.headers.get("origin") ?? "",
+  );
 
-  callback(null, corsOptions); // callback expects two parameters: error and options
+  await sleep(3000); // Simulates async stuff
+
+  return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
 
 const router = new Router();

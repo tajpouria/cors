@@ -13,7 +13,8 @@ router
   .options("/book/:id", oakCors()) // enable pre-flight request for OPTIONS request
   .delete("/book/:id", oakCors(), (context) => {
     if (context.params && context.params.id && books.has(context.params.id)) {
-      context.response.body = books.get(context.params.id);
+      books.delete(context.params.id);
+      context.response.body = { ok: true };
     }
   });
 

@@ -15,8 +15,6 @@ CORS providing a [Oak](https://github.com/oakserver/oak) middleware that can be 
 
 ### Simple Usage (Enable All CORS Requests)
 
-#### Oak
-
 ```typescript
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
@@ -43,7 +41,7 @@ router
   });
 
 const app = new Application();
-app.use(oakCors()); // Enable All CORS Requests
+app.use(oakCors()); // Enable CORS for All Routes
 app.use(router.routes());
 
 console.info(`CORS-enabled web server listening on port 8000`);
@@ -51,8 +49,6 @@ await app.listen({ port: 8000 });
 ```
 
 ### Enable CORS for a Single Route
-
-#### Oak
 
 ```typescript
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
@@ -85,8 +81,6 @@ await app.listen({ port: 8000 });
 ```
 
 ### Configuring CORS
-
-#### Oak
 
 ```typescript
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
@@ -132,11 +126,19 @@ the possible value types.
 This function is designed to allow the dynamic loading of allowed origin(s) from
 a backing dataSource, like a database.
 
-#### Oak
-
 ```typescript
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
+
+const sleep = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+const loadOriginsFromDataBase = async () => {
+  await sleep(3000);
+  return ["http://localhost:1234", "http://localhost:3000"];
+};
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -145,19 +147,16 @@ books.set("1", {
   author: "Mary Shelley",
 });
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // db.loadOrigins is an example call to load
-    // a list of origins from a backing database
-    db.loadOrigins(function (error, origins) {
-      callback(error, origins);
-    });
+const corsOptions: CorsOptions = {
+  origin: async (requestOrigin) => {
+    const origins = await loadOriginsFromDataBase(); // Simulates async stuff
+
+    return origins; //  Reflect (enable) the requested origin in the CORS response for this origins
   },
 };
 
 const router = new Router();
 router.get("/book", oakCors(corsOptions), (context) => {
-  // Enable CORS for a Single Route
   context.response.body = Array.from(books.values());
 });
 
@@ -168,15 +167,15 @@ console.info(`CORS-enabled web server listening on port 8000`);
 await app.listen({ port: 8000 });
 ```
 
-If you do not want to block REST tools or server-to-server requests, add a !origin check in the origin function like so:
+If you do not want to block REST tools or server-to-server requests, add a !requestOrigin check in the origin function like so:
 
 ```typescript
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || !whitelist.includes(origin)) {
-      callback(null, true);
+  origin: (requestOrigin) => {
+    if (!requestOrigin) {
+      return true;
     } else {
-      callback(new Error("Not allowed by CORS"));
+      thrown new Error("Not allowed by CORS");
     }
   },
 };
@@ -190,8 +189,6 @@ Certain CORS requests are considered 'complex' and require an initial
 GET/HEAD/POST (such as DELETE) or that uses custom headers. To enable
 pre-flighting, you must add a new OPTIONS handler for the route you want
 to support:
-
-#### Oak
 
 ```typescript
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
@@ -209,7 +206,8 @@ router
   .options("/book/:id", oakCors()) // enable pre-flight request for OPTIONS request
   .delete("/book/:id", oakCors(), (context) => {
     if (context.params && context.params.id && books.has(context.params.id)) {
-      context.response.body = books.get(context.params.id);
+      books.delete(context.params.id);
+      context.response.body = { ok: true };
     }
   });
 
@@ -226,11 +224,14 @@ routes.
 
 ### Configuring CORS Asynchronously
 
-#### Oak
-
 ```typescript
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
+
+const sleep = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -239,17 +240,16 @@ books.set("1", {
   author: "Mary Shelley",
 });
 
-const whitelist = ["http://localhost:1234", "http://localhost:3000"];
+const whitelist = ["http://localhost:123", "http://localhost:3000"];
 
-const corsOptionsDelegate: OakCorsOptionsDelegate = (request, callback) => {
-  let corsOptions: CorsOptions = {};
-  if (whitelist.includes(request.headers.get("origin") ?? "")) {
-    corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
-  } else {
-    corsOptions = { origin: false }; // disable CORS for this request
-  }
+const corsOptionsDelegate: OakCorsOptionsDelegate = async (request) => {
+  const isOriginAllowed = whitelist.includes(
+    request.headers.get("origin") ?? "",
+  );
 
-  callback(null, corsOptions); // callback expects two parameters: error and options
+  await sleep(3000); // Simulates async stuff
+
+  return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
 
 const router = new Router();
