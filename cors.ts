@@ -88,16 +88,16 @@ export class Cors {
         .configureMaxAge()
         .configureExposedHeaders();
 
-      if (corsOptions.preflightContinue) next();
+      if (corsOptions.preflightContinue) return next();
       else {
         setStatus(corsOptions.optionsSuccessStatus);
         setResponseHeader("Content-Length", "0");
-        next();
+        return next();
       }
     } else {
       configureOrigin().configureCredentials().configureExposedHeaders();
 
-      next();
+      return next();
     }
   };
 

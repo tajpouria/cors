@@ -1,24 +1,28 @@
-import { OakMiddleware, OakRequest } from "./deps.ts";
+import { AbcMiddleWare, AbcRequest } from "./deps.ts";
 
 import { CorsOptions, CorsOptionsDelegate } from "./types.ts";
 import { Cors } from "./cors.ts";
 
-export type OakCorsOptionsDelegate = CorsOptionsDelegate<OakRequest>;
+export type AbcCorsOptionsDelegate = CorsOptionsDelegate<AbcRequest>;
 
 /**
- * oakCors middleware wrapper
- * @param o CorsOptions | OakCorsOptionsDelegate
+ * abcCors middleware wrapper
+ * @param o CorsOptions | AbcCorsOptionsDelegate
  * @link https://github.com/tajpouria/cors/blob/master/README.md#cors
  */
-export const oakCors = (
-  o?: CorsOptions | OakCorsOptionsDelegate,
-): OakMiddleware => {
+export const abcCors = (
+  o?: CorsOptions | AbcCorsOptionsDelegate,
+): AbcMiddleWare => {
   const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
-    OakCorsOptionsDelegate
+    AbcCorsOptionsDelegate
   >(o);
 
-  return async ({ request, response }, next) => {
+  return (abcNext) => async (c) => {
+    const next = () => abcNext(c);
+
     try {
+      const { request, response } = c;
+
       const options = await corsOptionsDelegate(request);
 
       const corsOptions = Cors.produceCorsOptions(options || {});
@@ -37,11 +41,11 @@ export const oakCors = (
 
         const origin = await originDelegate(getRequestHeader("origin"));
 
-        if (!origin) next();
+        if (!origin) return next();
         else {
           corsOptions.origin = origin;
 
-          new Cors({
+          return new Cors({
             corsOptions,
             requestMethod,
             getRequestHeader,
@@ -53,7 +57,7 @@ export const oakCors = (
         }
       }
     } catch (error) {
-      next();
+      return next();
     }
   };
 };

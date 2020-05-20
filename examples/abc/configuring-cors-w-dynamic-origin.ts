@@ -1,5 +1,5 @@
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { oakCors, CorsOptions } from "../../mod.ts";
+import { Application } from "https://deno.land/x/abc/mod.ts";
+import { abcCors, CorsOptions } from "../../mod.ts";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -10,6 +10,8 @@ const loadOriginsFromDataBase = async () => {
   await sleep(3000);
   return ["http://localhost:1234", "http://localhost:3000"];
 };
+
+const app = new Application();
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -26,13 +28,9 @@ const corsOptions: CorsOptions = {
   },
 };
 
-const router = new Router();
-router.get("/book", oakCors(corsOptions), (context) => {
-  context.response.body = Array.from(books.values());
-});
-
-const app = new Application();
-app.use(router.routes());
-
-console.info(`CORS-enabled web server listening on port 8000`);
-await app.listen({ port: 8000 });
+app
+  .use(abcCors(corsOptions))
+  .get("/book", (c) => {
+    return Array.from(books);
+  })
+  .start({ port: 8000 });

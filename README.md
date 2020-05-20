@@ -1,6 +1,6 @@
 # cors
 
-CORS providing a [Oak](https://github.com/oakserver/oak) middleware that can be used to enable [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) with various options.
+CORS is Deno.js module for providing a [Oak](https://github.com/oakserver/oak)/[Abc](https://github.com/zhmushan/abc) middleware that can be used to enable [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) with various options.
 
 - [Usage](#usage)
   - [Simple Usage](#simple-usage-enable-all-cors-requests)
@@ -10,6 +10,7 @@ CORS providing a [Oak](https://github.com/oakserver/oak) middleware that can be 
   - [Enabling CORS Pre-Flight](#enabling-cors-pre-flight)
   - [Configuring CORS Asynchronously](#configuring-cors-asynchronously)
 - [Configuration Options](#configuration-options)
+- [Examples](#examples)
 
 ## Usage
 
@@ -149,7 +150,7 @@ books.set("1", {
 
 const corsOptions: CorsOptions = {
   origin: async (requestOrigin) => {
-    const origins = await loadOriginsFromDataBase(); // Simulates async stuff
+    const origins = await loadOriginsFromDataBase(); // Simulate asynchronous task
 
     return origins; //  Reflect (enable) the requested origin in the CORS response for this origins
   },
@@ -247,7 +248,7 @@ const corsOptionsDelegate: OakCorsOptionsDelegate = async (request) => {
     request.headers.get("origin") ?? "",
   );
 
-  await sleep(3000); // Simulates async stuff
+  await sleep(3000); // Simulate asynchronous task
 
   return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
@@ -292,6 +293,13 @@ The default configuration is the equivalent of:
   "optionsSuccessStatus": 204
 }
 ```
+
+## Examples
+
+Document example can be found here:
+
+- [ Oak ](./examples/oak)
+- [ Abc ](./examples/abc)
 
 ## License
 
