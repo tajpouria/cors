@@ -1,5 +1,5 @@
 export * from "./types.ts";
 
-export { oakCors, OakCorsOptionsDelegate } from "./oakCors.ts";
+export { oakCors } from "./oakCors.ts";
 
-export { abcCors, AbcCorsOptionsDelegate } from "./abcCors.ts";
+export { abcCors } from "./abcCors.ts";

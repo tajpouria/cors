@@ -1,5 +1,5 @@
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { oakCors, OakCorsOptionsDelegate } from "../../mod.ts";
+import { Application, Router, Request } from "https://deno.land/x/oak/mod.ts";
+import { oakCors, CorsOptionsDelegate } from "../../mod.ts";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -13,9 +13,9 @@ books.set("1", {
   author: "Mary Shelley",
 });
 
-const whitelist = ["http://localhost:123", "http://localhost:3000"];
+const whitelist = ["http://localhost:1234", "http://localhost:3000"];
 
-const corsOptionsDelegate: OakCorsOptionsDelegate = async (request) => {
+const corsOptionsDelegate: CorsOptionsDelegate<Request> = async (request) => {
   const isOriginAllowed = whitelist.includes(
     request.headers.get("origin") ?? "",
   );

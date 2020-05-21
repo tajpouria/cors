@@ -1,27 +1,44 @@
-import { AbcMiddleWare, AbcRequest } from "./deps.ts";
-
 import { CorsOptions, CorsOptionsDelegate } from "./types.ts";
 import { Cors } from "./cors.ts";
 
-export type AbcCorsOptionsDelegate = CorsOptionsDelegate<AbcRequest>;
+interface Req {
+  method: string;
+  headers: {
+    get(headerKey: string): string | null | undefined;
+  };
+}
+
+interface Res {
+  status?: number | string;
+  headers: {
+    get(headerKey: string): string | null | undefined;
+    set(headerKey: string, headerValue: string): any;
+  };
+}
 
 /**
  * abcCors middleware wrapper
- * @param o CorsOptions | AbcCorsOptionsDelegate
+ * @param o CorsOptions | CorsOptionsDelegate
  * @link https://github.com/tajpouria/cors/blob/master/README.md#cors
  */
-export const abcCors = (
-  o?: CorsOptions | AbcCorsOptionsDelegate,
-): AbcMiddleWare => {
+export const abcCors = <
+  RequestT extends Req = any,
+  ResponseT extends Res = any,
+  MiddlewareT extends (
+    next: (...args: any) => any,
+  ) => (context: { request: RequestT; response: ResponseT }) => any = any
+>(
+  o?: CorsOptions | CorsOptionsDelegate<RequestT>,
+) => {
   const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
-    AbcCorsOptionsDelegate
+    CorsOptionsDelegate<RequestT>
   >(o);
 
-  return (abcNext) => async (c) => {
-    const next = () => abcNext(c);
+  return ((abcNext) => async (context) => {
+    const next = () => abcNext(context);
 
     try {
-      const { request, response } = c;
+      const { request, response } = context;
 
       const options = await corsOptionsDelegate(request);
 
@@ -59,5 +76,5 @@ export const abcCors = (
     } catch (error) {
       return next();
     }
-  };
+  }) as MiddlewareT;
 };

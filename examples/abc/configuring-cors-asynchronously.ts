@@ -1,5 +1,5 @@
 import { Application } from "https://deno.land/x/abc/mod.ts";
-import { abcCors, AbcCorsOptionsDelegate } from "../../mod.ts";
+import { abcCors, CorsOptionsDelegate } from "../../mod.ts";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -17,7 +17,7 @@ books.set("1", {
 
 const whitelist = ["http://localhost:1234", "http://localhost:3000"];
 
-const corsOptionsDelegate: AbcCorsOptionsDelegate = async (request) => {
+const corsOptionsDelegate: CorsOptionsDelegate = async (request) => {
   const isOriginAllowed = whitelist.includes(
     request.headers.get("origin") ?? "",
   );

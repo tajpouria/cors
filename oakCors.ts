@@ -1,23 +1,41 @@
-import { OakMiddleware, OakRequest } from "./deps.ts";
-
 import { CorsOptions, CorsOptionsDelegate } from "./types.ts";
 import { Cors } from "./cors.ts";
 
-export type OakCorsOptionsDelegate = CorsOptionsDelegate<OakRequest>;
+interface Req {
+  method: string;
+  headers: {
+    get(headerKey: string): string | null | undefined;
+  };
+}
+
+interface Res {
+  status?: number | string;
+  headers: {
+    get(headerKey: string): string | null | undefined;
+    set(headerKey: string, headerValue: string): any;
+  };
+}
 
 /**
  * oakCors middleware wrapper
- * @param o CorsOptions | OakCorsOptionsDelegate
+ * @param o CorsOptions | CorsOptionsDelegate
  * @link https://github.com/tajpouria/cors/blob/master/README.md#cors
  */
-export const oakCors = (
-  o?: CorsOptions | OakCorsOptionsDelegate,
-): OakMiddleware => {
+export const oakCors = <
+  RequestT extends Req = any,
+  ResponseT extends Res = any,
+  MiddlewareT extends (
+    context: { request: RequestT; response: ResponseT },
+    next: (...args: any) => any,
+  ) => any = any
+>(
+  o?: CorsOptions | CorsOptionsDelegate<RequestT>,
+) => {
   const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
-    OakCorsOptionsDelegate
+    CorsOptionsDelegate<RequestT>
   >(o);
 
-  return async ({ request, response }, next) => {
+  return (async ({ request, response }, next) => {
     try {
       const options = await corsOptionsDelegate(request);
 
@@ -55,5 +73,5 @@ export const oakCors = (
     } catch (error) {
       next();
     }
-  };
+  }) as MiddlewareT;
 };

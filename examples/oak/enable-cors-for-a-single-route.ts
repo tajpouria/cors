@@ -10,7 +10,8 @@ books.set("1", {
 
 const router = new Router();
 router
-  .get("/book", oakCors(), (context) => { // Enable CORS for a Single Route
+  .get("/book", oakCors(), (context) => {
+    // Enable CORS for a Single Route
     context.response.body = Array.from(books.values());
   })
   .get("/book/:id", (context) => {
