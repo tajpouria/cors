@@ -59,7 +59,7 @@ export const oakCors = <
         else {
           corsOptions.origin = origin;
 
-          new Cors({
+          return new Cors({
             corsOptions,
             requestMethod,
             getRequestHeader,
