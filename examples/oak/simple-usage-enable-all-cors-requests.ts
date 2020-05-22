@@ -1,4 +1,4 @@
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { Application, Router, send } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "../../mod.ts";
 
 const books = new Map<string, any>();
@@ -10,8 +10,11 @@ books.set("1", {
 
 const router = new Router();
 router
-  .get("/", (context) => {
-    context.response.body = "Hello world!";
+  .get("/", async (context) => {
+    await send(context, context.request.url.pathname, {
+      root: `${Deno.cwd()}/static`,
+      index: "index.html",
+    });
   })
   .get("/book", (context) => {
     context.response.body = Array.from(books.values());
@@ -23,9 +26,7 @@ router
   });
 
 const app = new Application();
-
-app.use(oakCors()); // Enable All CORS Requests
-
+app.use(oakCors()); // Enable CORS for All Routes
 app.use(router.routes());
 
 console.info(`CORS-enabled web server listening on port 8000`);

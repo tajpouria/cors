@@ -17,7 +17,7 @@ CORS is a Deno.js module for providing a [Oak](https://github.com/oakserver/oak)
 ### Simple Usage (Enable All CORS Requests)
 
 ```typescript
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { Application, Router, Send } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
 
 const books = new Map<string, any>();
@@ -29,8 +29,11 @@ books.set("1", {
 
 const router = new Router();
 router
-  .get("/", (context) => {
-    context.response.body = "Hello world!";
+  .get("/", async (context) => {
+    await send(context, context.request.url.pathname, {
+      root: `${Deno.cwd()}/static`,
+      index: "index.html",
+    });
   })
   .get("/book", (context) => {
     context.response.body = Array.from(books.values());

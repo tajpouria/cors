@@ -11,7 +11,8 @@ books.set("1", {
 });
 
 app
-  .use(abcCors()) // Enable All CORS Requests
+  .use(abcCors()) // Enable CORS for All Routes
+  .file("/", "./static/index.html")
   .get("/book", (c) => {
     return Array.from(books);
   })
