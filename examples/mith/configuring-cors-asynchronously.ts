@@ -10,12 +10,10 @@ const sleep = (ms: number) =>
 const app = new Mith();
 const router = new Router();
 
-router.use('GET', '/book',
-  (req, res, next) => {
-    res.body = Array.from(books)
-    next()
-  }
-)
+router.use("GET", "/book", (req, res, next) => {
+  res.body = Array.from(books);
+  next();
+});
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -36,7 +34,7 @@ const corsOptionsDelegate: CorsOptionsDelegate = async (request) => {
   return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
 
-app.use(mithCors(corsOptionsDelegate))
-app.use(router.getRoutes())
+app.use(mithCors(corsOptionsDelegate));
+app.use(router.getRoutes());
 
 app.listen({ port: 8000 });

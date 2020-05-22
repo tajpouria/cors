@@ -5,19 +5,16 @@ import { mithCors } from "../../mod.ts";
 const app = new Mith();
 const router = new Router();
 
-router.use('GET', '/book',
-  (req, res, next) => {
-    res.body = Array.from(books)
-    next()
+router.use("GET", "/book", (req, res, next) => {
+  res.body = Array.from(books);
+  next();
+});
+router.use("GET", "/book/:id", (req, res, next) => {
+  if (req.params?.id && books.has(req.params.id)) {
+    res.body = books.get(req.params.id);
+    next();
   }
-)
-router.use('GET', '/book/:id',
-  (req, res, next) => {
-    if (req.params?.id && books.has(req.params.id)) {
-      res.body = books.get(req.params.id);
-      next()
-    }
-})
+});
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -30,8 +27,8 @@ app.use(
   mithCors({
     origin: /^.+localhost:(3000|1234)$/,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  })
-)
-app.use(router.getRoutes())
+  }),
+);
+app.use(router.getRoutes());
 
 app.listen({ port: 8000 });

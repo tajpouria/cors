@@ -5,19 +5,17 @@ import { mithCors } from "../../mod.ts";
 const app = new Mith();
 const router = new Router();
 
-router.use('OPTIONS', '/book/:id',
-  mithCors()
-)
-router.use('DELETE', '/book/:id', [
+router.use("OPTIONS", "/book/:id", mithCors());
+router.use("DELETE", "/book/:id", [
   (req, res, next) => {
     if (req.params && req.params.id && books.has(req.params.id)) {
       books.delete(req.params.id);
       res.body = { ok: true };
-      next()
+      next();
     }
   },
-  mithCors()
-])
+  mithCors(),
+]);
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -26,6 +24,6 @@ books.set("1", {
   author: "Mary Shelley",
 });
 
-app.use(router.getRoutes())
+app.use(router.getRoutes());
 
 app.listen({ port: 8000 });

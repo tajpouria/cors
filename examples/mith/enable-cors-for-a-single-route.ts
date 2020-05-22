@@ -5,21 +5,19 @@ import { mithCors } from "../../mod.ts";
 const app = new Mith();
 const router = new Router();
 
-router.use('GET', '/book',
-  (req, res, next) => {
-    res.body = Array.from(books)
-    next()
-  }
-)
-router.use('GET', '/book/:id', [
+router.use("GET", "/book", (req, res, next) => {
+  res.body = Array.from(books);
+  next();
+});
+router.use("GET", "/book/:id", [
   mithCors(),
   (req, res, next) => {
     if (req.params?.id && books.has(req.params.id)) {
       res.body = books.get(req.params.id);
-      next()
+      next();
     }
-  }
-])
+  },
+]);
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -28,6 +26,6 @@ books.set("1", {
   author: "Mary Shelley",
 });
 
-app.use(router.getRoutes())
+app.use(router.getRoutes());
 
 app.listen({ port: 8000 });

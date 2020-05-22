@@ -15,12 +15,10 @@ const loadOriginsFromDataBase = async () => {
 const app = new Mith();
 const router = new Router();
 
-router.use('GET', '/book',
-  (req, res, next) => {
-    res.body = Array.from(books)
-    next()
-  }
-)
+router.use("GET", "/book", (req, res, next) => {
+  res.body = Array.from(books);
+  next();
+});
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -37,7 +35,7 @@ const corsOptions: CorsOptions = {
   },
 };
 
-app.use(mithCors(corsOptions))
-app.use(router.getRoutes())
+app.use(mithCors(corsOptions));
+app.use(router.getRoutes());
 
 app.listen({ port: 8000 });
