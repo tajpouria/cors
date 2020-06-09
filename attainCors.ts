@@ -1,13 +1,32 @@
 import { CorsOptions, CorsOptionsDelegate } from "./types.ts";
 import { Cors } from "./cors.ts";
-import { Request } from "https://deno.land/x/attain/mod.ts";
-import { CallBackType } from "https://deno.land/x/attain/types.ts";
 
-export const attainCors = (
-  o?: CorsOptions | CorsOptionsDelegate<Request>,
+interface Req {
+  method: string;
+  headers: {
+    get(headerKey: string): string | null | undefined;
+  };
+}
+
+interface Res {
+  status: (status: number) => any;
+  headers: {
+    get(headerKey: string): string | null | undefined;
+    set(headerKey: string, headerValue: string): any;
+  };
+}
+
+export const attainCors = <
+  RequestT extends Req = any,
+  ResponseT extends Res = any,
+  MiddlewareT extends (
+    request: RequestT, response: ResponseT
+  ) => any = any
+>(
+  o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ) => {
   const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
-    CorsOptionsDelegate<Request>
+    CorsOptionsDelegate<RequestT>
   >(o);
 
   return async function cors(request, response) {
@@ -26,7 +45,7 @@ export const attainCors = (
           response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
-        const setStatus = (statusCode: number) => 
+        const setStatus = (statusCode: number) =>
           response.status(statusCode)
 
         const origin = await originDelegate(getRequestHeader("origin"));
@@ -48,5 +67,5 @@ export const attainCors = (
     } catch (error) {
       throw error
     }
-  } as CallBackType;
+  } as MiddlewareT;
 };
