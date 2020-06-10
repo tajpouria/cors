@@ -1,6 +1,6 @@
 # cors
 
-CORS is a Deno.js module for providing a [Oak](https://github.com/oakserver/oak)/[Abc](https://github.com/zhmushan/abc)/[Mith](https://github.com/jwebcoder/mith) middleware that can be used to enable [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) with various options.
+CORS is a Deno.js module for providing a [Oak](https://github.com/oakserver/oak)/[Abc](https://github.com/zhmushan/abc)/[Mith](https://github.com/jwebcoder/mith)/[Attain](https://github.com/aaronwlee/Attain) middleware that can be used to enable [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) with various options.
 
 - [Usage](#usage)
   - [Simple Usage](#simple-usage-enable-all-cors-requests)
