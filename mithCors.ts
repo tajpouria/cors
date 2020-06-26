@@ -1,5 +1,5 @@
 import { CorsOptions, CorsOptionsDelegate } from "./types.ts";
-import { Cors } from "https://deno.land/x/cors/cors.ts";
+import { Cors } from "./cors.ts";
 
 interface Req {
   method: string;
