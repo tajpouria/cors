@@ -14,6 +14,7 @@ interface Res {
     get(headerKey: string): string | null | undefined;
     set(headerKey: string, headerValue: string): any;
   };
+  send: (body: any) => any;
 }
 
 export const attainCors = <
@@ -64,6 +65,11 @@ export const attainCors = <
           }).configureHeaders();
         }
       }
+
+      if(request.method === "OPTIONS") {
+        response.send("");
+      }
+
     } catch (error) {
       throw error
     }
