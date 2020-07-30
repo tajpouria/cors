@@ -9,9 +9,7 @@ books.set("1", {
 });
 
 const app = new App();
-app.options("/book/:id", attainCors(), (req, res) => {
-  res.send("");
-}) // enable pre-flight request for OPTIONS request
+app.options("/book/:id", attainCors()) // enable pre-flight request for OPTIONS request
 app.delete("/book/:id", attainCors(), (req, res) => {
   if (req.params && req.params.id && books.has(req.params.id)) {
     books.delete(req.params.id);
