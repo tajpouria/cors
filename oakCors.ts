@@ -71,7 +71,9 @@ export const oakCors = <
         }
       }
     } catch (error) {
-      next();
+      console.error(error);
     }
+
+    next();
   }) as MiddlewareT;
 };

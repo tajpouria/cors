@@ -28,7 +28,7 @@ export const mithCors = <
     request: RequestT,
     response: ResponseT,
     next: (...args: any) => any,
-  ) => any = any,
+  ) => any = any
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ) => {
@@ -51,9 +51,8 @@ export const mithCors = <
           response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
-        const setStatus = (
-          statusCode: number,
-        ) => (response.status = statusCode);
+        const setStatus = (statusCode: number) =>
+          (response.status = statusCode);
 
         const origin = await originDelegate(getRequestHeader("origin"));
 
@@ -73,7 +72,9 @@ export const mithCors = <
         }
       }
     } catch (error) {
-      return next();
+      console.error(error);
     }
+
+    return next();
   }) as MiddlewareT;
 };

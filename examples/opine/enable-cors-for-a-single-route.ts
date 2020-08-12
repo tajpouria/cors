@@ -1,7 +1,7 @@
-import { Application } from "https://deno.land/x/opine/mod.ts";
+import { opine } from "https://deno.land/x/opine/mod.ts";
 import { opineCors } from "../../mod.ts";
 
-const app = new Application();
+const app = opine();
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -11,16 +11,16 @@ books.set("1", {
 });
 
 app
-  .get("/book", (c) => {
-    return Array.from(books.values());
+  .use(opineCors({ origin: false })) // Disable CORS for a all Routes
+  .get("/book", (_req, res) => {
+    res.send(Array.from(books));
   })
-  .get(
-    "/book/:id",
-    (c) => {
-      if (c.params?.id && books.has(c.params.id)) {
-        return books.get(c.params.id);
-      }
-    },
-    opineCors(), // Enable CORS for a Single Route
-  )
-  .start({ port: 8000 });
+  .get("/book/:id", opineCors(), (req, res) => {
+    // Enable CORS for a Single Route
+    if (req.params?.id && books.has(req.params.id)) {
+      res.send(books.get(req.params.id));
+    }
+  })
+  .listen({ port: 8000 }, () =>
+    console.info("CORS-enabled web server listening on port 8000"),
+  );

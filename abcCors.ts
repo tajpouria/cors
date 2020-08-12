@@ -74,7 +74,9 @@ export const abcCors = <
         }
       }
     } catch (error) {
-      return next();
+      console.error(error);
     }
+
+    return next();
   }) as MiddlewareT;
 };

@@ -4,16 +4,14 @@ import { Cors } from "./cors.ts";
 interface Req {
   method: string;
   headers: {
-    get(headerKey: string): string | null | undefined;
+    get(name: string): string | null | undefined;
   };
 }
 
 interface Res {
-  status?: number | string;
-  headers: {
-    get(headerKey: string): string | null | undefined;
-    set(headerKey: string, headerValue: string): any;
-  };
+  setStatus(code: any): this;
+  set(headerKey: string, headerValue: string): this;
+  get(headerKey: string): string | null | undefined;
 }
 
 /**
@@ -22,11 +20,13 @@ interface Res {
  * @link https://github.com/tajpouria/cors/blob/master/README.md#cors
  */
 export const opineCors = <
-  RequestT extends Req = any,
+  RequestT extends Req = Req,
   ResponseT extends Res = any,
   MiddlewareT extends (
+    request: RequestT,
+    response: ResponseT,
     next: (...args: any) => any,
-  ) => (context: { request: RequestT; response: ResponseT }) => any = any
+  ) => any = any
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ) => {
@@ -34,12 +34,8 @@ export const opineCors = <
     CorsOptionsDelegate<RequestT>
   >(o);
 
-  return ((opineNext) => async (context) => {
-    const next = () => opineNext(context);
-
+  return (async (request, response, next) => {
     try {
-      const { request, response } = context;
-
       const options = await corsOptionsDelegate(request);
 
       const corsOptions = Cors.produceCorsOptions(options || {});
@@ -50,11 +46,11 @@ export const opineCors = <
         const getRequestHeader = (headerKey: string) =>
           request.headers.get(headerKey);
         const getResponseHeader = (headerKey: string) =>
-          response.headers.get(headerKey);
+          response.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
-          response.headers.set(headerKey, headerValue);
+          response.set(headerKey, headerValue);
         const setStatus = (statusCode: number) =>
-          (response.status = statusCode);
+          response.setStatus(statusCode);
 
         const origin = await originDelegate(getRequestHeader("origin"));
 
@@ -74,7 +70,9 @@ export const opineCors = <
         }
       }
     } catch (error) {
-      return next();
+      console.error(error);
     }
+
+    return next();
   }) as MiddlewareT;
 };

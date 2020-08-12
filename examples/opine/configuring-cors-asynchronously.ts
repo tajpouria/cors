@@ -1,4 +1,4 @@
-import { Application } from "https://deno.land/x/opine/mod.ts";
+import { opine } from "https://deno.land/x/opine/mod.ts";
 import { opineCors, CorsOptionsDelegate } from "../../mod.ts";
 
 const sleep = (ms: number) =>
@@ -6,7 +6,7 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-const app = new Application();
+const app = opine();
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -29,7 +29,9 @@ const corsOptionsDelegate: CorsOptionsDelegate = async (request) => {
 
 app
   .use(opineCors(corsOptionsDelegate))
-  .get("/book", (c) => {
-    return Array.from(books);
+  .get("/book", (_req, res) => {
+    res.send(Array.from(books));
   })
-  .start({ port: 8000 });
+  .listen({ port: 8000 }, () =>
+    console.info("CORS-enabled web server listening on port 8000"),
+  );

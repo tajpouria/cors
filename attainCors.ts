@@ -20,9 +20,7 @@ interface Res {
 export const attainCors = <
   RequestT extends Req = any,
   ResponseT extends Res = any,
-  MiddlewareT extends (
-    request: RequestT, response: ResponseT
-  ) => any = any
+  MiddlewareT extends (request: RequestT, response: ResponseT) => any = any
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ) => {
@@ -46,8 +44,7 @@ export const attainCors = <
           response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
-        const setStatus = (statusCode: number) =>
-          response.status(statusCode)
+        const setStatus = (statusCode: number) => response.status(statusCode);
 
         const origin = await originDelegate(getRequestHeader("origin"));
 
@@ -66,12 +63,11 @@ export const attainCors = <
         }
       }
 
-      if(request.method === "OPTIONS") {
+      if (request.method === "OPTIONS") {
         response.send("");
       }
-
     } catch (error) {
-      throw error
+      console.error(error);
     }
   } as MiddlewareT;
 };

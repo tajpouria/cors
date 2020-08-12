@@ -1,7 +1,7 @@
-import { Application } from "https://deno.land/x/opine/mod.ts";
+import { opine, serveStatic } from "https://deno.land/x/opine/mod.ts";
 import { opineCors } from "../../mod.ts";
 
-const app = new Application();
+const app = opine();
 
 const books = new Map<string, any>();
 books.set("1", {
@@ -10,15 +10,18 @@ books.set("1", {
   author: "Mary Shelley",
 });
 
+app.use(opineCors()); // Enable CORS for All Routes
+
 app
-  .use(opineCors()) // Enable CORS for All Routes
-  .file("/", "./static/index.html")
-  .get("/book", (c) => {
-    return Array.from(books);
+  .use(serveStatic("static"))
+  .get("/book", (_req, res) => {
+    res.send(Array.from(books));
   })
-  .get("/book/:id", (c) => {
-    if (c.params?.id && books.has(c.params.id)) {
-      return books.get(c.params.id);
+  .get("/book/:id", (req, res) => {
+    if (req.params?.id && books.has(req.params.id)) {
+      res.send(books.get(req.params.id));
     }
   })
-  .start({ port: 8000 });
+  .listen({ port: 8000 }, () =>
+    console.info("CORS-enabled web server listening on port 8000"),
+  );
