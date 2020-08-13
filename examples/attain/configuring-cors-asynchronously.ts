@@ -25,8 +25,6 @@ const corsOptionsDelegate: CorsOptionsDelegate<Request> = async (request) => {
   return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
 
-
-
 const app = new App();
 app.get("/book/:id", attainCors(corsOptionsDelegate), (req, res) => {
   if (req.params && req.params.id && books.has(req.params.id)) {

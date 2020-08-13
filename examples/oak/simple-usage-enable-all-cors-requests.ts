@@ -10,7 +10,7 @@ books.set("1", {
 
 const router = new Router();
 router
-  .get("/", async (context) => {
+  .get("/index.html", async (context) => {
     await send(context, context.request.url.pathname, {
       root: `${Deno.cwd()}/static`,
       index: "index.html",

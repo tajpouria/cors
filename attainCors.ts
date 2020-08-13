@@ -20,7 +20,7 @@ interface Res {
 export const attainCors = <
   RequestT extends Req = any,
   ResponseT extends Res = any,
-  MiddlewareT extends (request: RequestT, response: ResponseT) => any = any
+  MiddlewareT extends (request: RequestT, response: ResponseT) => any = any,
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ) => {

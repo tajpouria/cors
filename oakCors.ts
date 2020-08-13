@@ -27,7 +27,7 @@ export const oakCors = <
   MiddlewareT extends (
     context: { request: RequestT; response: ResponseT },
     next: (...args: any) => any,
-  ) => any = any
+  ) => any = any,
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ) => {
@@ -50,8 +50,9 @@ export const oakCors = <
           response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
-        const setStatus = (statusCode: number) =>
-          (response.status = statusCode);
+        const setStatus = (
+          statusCode: number,
+        ) => (response.status = statusCode);
 
         const origin = await originDelegate(getRequestHeader("origin"));
 

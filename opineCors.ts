@@ -26,7 +26,7 @@ export const opineCors = <
     request: RequestT,
     response: ResponseT,
     next: (...args: any) => any,
-  ) => any = any
+  ) => any = any,
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ) => {

@@ -34,7 +34,7 @@ export class Cors {
   });
 
   public static produceCorsOptionsDelegate = <
-    OptionsCallbackT = CorsOptionsDelegate<any>
+    OptionsCallbackT = CorsOptionsDelegate<any>,
   >(
     o?: CorsOptions | OptionsCallbackT,
   ) =>
@@ -46,8 +46,9 @@ export class Cors {
     corsOptions: CorsProps["corsOptions"],
   ) => {
     if (corsOptions.origin) {
-      if (typeof corsOptions.origin === "function")
+      if (typeof corsOptions.origin === "function") {
         return corsOptions.origin as OriginDelegate;
+      }
 
       return ((_requestOrigin) => corsOptions.origin) as OriginDelegate;
     }
@@ -57,18 +58,18 @@ export class Cors {
     requestOrigin: string | null | undefined,
     allowedOrigin: CorsOptions["origin"],
   ): boolean => {
-    if (Array.isArray(allowedOrigin))
+    if (Array.isArray(allowedOrigin)) {
       return allowedOrigin.some((ao) =>
-        Cors.isOriginAllowed(requestOrigin, ao),
+        Cors.isOriginAllowed(requestOrigin, ao)
       );
-    else if (typeof allowedOrigin === "string")
+    } else if (typeof allowedOrigin === "string") {
       return requestOrigin === allowedOrigin;
-    else if (
+    } else if (
       allowedOrigin instanceof RegExp &&
       typeof requestOrigin === "string"
-    )
+    ) {
       return allowedOrigin.test(requestOrigin);
-    else return !!allowedOrigin;
+    } else return !!allowedOrigin;
   };
 
   public configureHeaders = () => {
@@ -107,14 +108,14 @@ export class Cors {
       setVaryHeader,
     } = this;
 
-    if (!corsOptions.origin || corsOptions.origin === "*")
+    if (!corsOptions.origin || corsOptions.origin === "*") {
       setResponseHeader("Access-Control-Allow-Origin", "*");
-    else if (typeof corsOptions.origin === "string") {
+    } else if (typeof corsOptions.origin === "string") {
       setResponseHeader("Access-Control-Allow-Origin", corsOptions.origin);
       setVaryHeader("Origin");
     } else {
-      const requestOrigin =
-        getRequestHeader("origin") ?? getRequestHeader("Origin");
+      const requestOrigin = getRequestHeader("origin") ??
+        getRequestHeader("Origin");
 
       setResponseHeader(
         "Access-Control-Allow-Origin",
@@ -131,8 +132,9 @@ export class Cors {
   private configureCredentials = () => {
     const { corsOptions, setResponseHeader } = this.props;
 
-    if (corsOptions.credentials === true)
+    if (corsOptions.credentials === true) {
       setResponseHeader("Access-Control-Allow-Credentials", "true");
+    }
 
     return this;
   };
@@ -159,21 +161,21 @@ export class Cors {
     let allowedHeaders = corsOptions.allowedHeaders;
 
     if (!allowedHeaders) {
-      allowedHeaders =
-        getRequestHeader("access-control-request-headers") ??
+      allowedHeaders = getRequestHeader("access-control-request-headers") ??
         getRequestHeader("Access-Control-Request-Headers") ??
         undefined;
 
       setVaryHeader("Access-Control-request-Headers");
     }
 
-    if (allowedHeaders?.length)
+    if (allowedHeaders?.length) {
       setResponseHeader(
         "Access-Control-Allow-Headers",
         Array.isArray(allowedHeaders)
           ? allowedHeaders.join(",")
           : allowedHeaders,
       );
+    }
 
     return this;
   };
@@ -181,13 +183,13 @@ export class Cors {
   private configureMaxAge = () => {
     const { corsOptions, setResponseHeader } = this.props;
 
-    const maxAge =
-      (typeof corsOptions.maxAge === "number" ||
-        typeof corsOptions.maxAge === "string") &&
+    const maxAge = (typeof corsOptions.maxAge === "number" ||
+      typeof corsOptions.maxAge === "string") &&
       corsOptions.maxAge.toString();
 
-    if (maxAge && maxAge.length)
+    if (maxAge && maxAge.length) {
       setResponseHeader("Access-Control-Max-Age", maxAge);
+    }
 
     return this;
   };
@@ -197,13 +199,14 @@ export class Cors {
 
     let exposedHeaders = corsOptions.exposedHeaders;
 
-    if (exposedHeaders?.length)
+    if (exposedHeaders?.length) {
       setResponseHeader(
         "Access-Control-Expose-Headers",
         Array.isArray(exposedHeaders)
           ? exposedHeaders.join(",")
           : exposedHeaders,
       );
+    }
 
     return this;
   };
@@ -220,8 +223,9 @@ export class Cors {
       existingHeader &&
       typeof existingHeader === "string" &&
       (existingHeader = appendVaryHeader(existingHeader, field))
-    )
+    ) {
       setResponseHeader("Vary", existingHeader);
+    }
   };
 
   private appendVaryHeader = (header: string, field: string) => {

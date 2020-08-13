@@ -19,6 +19,7 @@ app
       res.send({ ok: true });
     }
   })
-  .listen({ port: 8000 }, () =>
-    console.info("CORS-enabled web server listening on port 8000"),
+  .listen(
+    { port: 8000 },
+    () => console.info("CORS-enabled web server listening on port 8000"),
   );

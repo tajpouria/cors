@@ -1,0 +1,35 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: download deno
+        uses: denolib/setup-deno@v2
+        with:
+          deno-version: v1.2.1
+      - name: check format
+        run: deno fmt --check
+
+      - name: test oakCors
+        run: ../../test/run.sh oak
+
+      - name: test opineCors
+        run: ../../test/run.sh opine
+
+      - name: test abcCors
+        run: ../../test/run.sh abc
+
+      - name: test attainCors
+        run: ../../test/run.sh attain
+
+      - name: test mithCors
+        run: ../../test/run.sh mith
