@@ -11,9 +11,11 @@ const REQUEST_ORIGIN_WHITELIST = [
 ];
 
 Deno.test(
-  `Set 'access-control-allow-origin' response header to 'null' on getBooks when request origin IS NOT ${REQUEST_ORIGIN_WHITELIST.join(
-    " or ",
-  )}`,
+  `Set 'access-control-allow-origin' response header to 'null' on getBooks when request origin IS NOT ${
+    REQUEST_ORIGIN_WHITELIST.join(
+      " or ",
+    )
+  }`,
   async () => {
     const res = await exampleServerAPI.getBooksResponse();
 
@@ -22,15 +24,17 @@ Deno.test(
 );
 
 Deno.test(
-  `Set 'access-control-allow-origin' response header to request origin on getBooks when request origin IS ${REQUEST_ORIGIN_WHITELIST.join(
-    " or ",
-  )}`,
+  `Set 'access-control-allow-origin' response header to request origin on getBooks when request origin IS ${
+    REQUEST_ORIGIN_WHITELIST.join(
+      " or ",
+    )
+  }`,
   async () => {
     const responses = await Promise.all(
       REQUEST_ORIGIN_WHITELIST.map((origin) =>
         exampleServerAPI.getBooksResponse({
           headers: { origin },
-        }),
+        })
       ),
     );
 
