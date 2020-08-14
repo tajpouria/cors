@@ -2,10 +2,12 @@ import { CorsOptions, CorsOptionsDelegate } from "./types.ts";
 import { Cors } from "./cors.ts";
 
 interface Req {
-  method: string;
-  headers: {
-    get(headerKey: string): string | null | undefined;
-  };
+  serverRequest: {
+    method: string;
+    headers: {
+      get(headerKey: string): string | null | undefined;
+    };
+  }
 }
 
 interface Res {
@@ -37,6 +39,7 @@ export const mithCors = <
   >(o);
 
   return (async (request, response, next) => {
+    const serverRequest = request.serverRequest
     try {
       const options = await corsOptionsDelegate(request);
 
@@ -44,9 +47,9 @@ export const mithCors = <
       const originDelegate = Cors.produceOriginDelegate(corsOptions);
 
       if (originDelegate) {
-        const requestMethod = request.method;
+        const requestMethod = serverRequest.method;
         const getRequestHeader = (headerKey: string) =>
-          request.headers.get(headerKey);
+          serverRequest.headers.get(headerKey);
         const getResponseHeader = (headerKey: string) =>
           response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
