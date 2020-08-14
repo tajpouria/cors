@@ -7,7 +7,7 @@ const sleep = (ms: number) =>
   });
 
 const loadOriginsFromDataBase = async () => {
-  await sleep(3000);
+  await sleep(100);
   return ["http://localhost:1234", "http://localhost:3000"];
 };
 

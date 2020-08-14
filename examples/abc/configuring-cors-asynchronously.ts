@@ -22,7 +22,7 @@ const corsOptionsDelegate: CorsOptionsDelegate = async (request) => {
     request.headers.get("origin") ?? "",
   );
 
-  await sleep(3000); // Simulate asynchronous task
+  await sleep(100); // Simulate asynchronous task
 
   return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
@@ -33,3 +33,5 @@ app
     return Array.from(books);
   })
   .start({ port: 8000 });
+
+console.info("CORS-enabled web server listening on port 8000");

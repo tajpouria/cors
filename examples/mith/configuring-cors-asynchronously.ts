@@ -1,5 +1,5 @@
-import { Mith } from "https://deno.land/x/mith@v0.1.1/mod.ts";
-import { Router } from "https://deno.land/x/mith_router@v0.0.6/mod.ts";
+import { Mith } from "https://deno.land/x/mith@v0.7.0/mod.ts";
+import { Router } from "https://deno.land/x/mith_router@v0.2.0/mod.ts";
 import { mithCors, CorsOptionsDelegate } from "../../mod.ts";
 
 const sleep = (ms: number) =>
@@ -29,7 +29,7 @@ const corsOptionsDelegate: CorsOptionsDelegate = async (request) => {
     request.headers.get("origin") ?? "",
   );
 
-  await sleep(3000); // Simulate asynchronous task
+  await sleep(100); // Simulate asynchronous task
 
   return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
@@ -38,3 +38,4 @@ app.use(mithCors(corsOptionsDelegate));
 app.use(router.getRoutes());
 
 app.listen({ port: 8000 });
+console.info("CORS-enabled web server listening on port 8000");

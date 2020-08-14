@@ -10,10 +10,10 @@ books.set("1", {
 
 const app = new App();
 app.use(attainCors()); // Enable CORS for All Routes
-app.get("/", async (req, res) => {
-  await res.status(200).sendFile(
-    `${Deno.cwd()}/examples/attain/static/index.html`,
-  );
+app.get("/index.html", async (req, res) => {
+  await res
+    .status(200)
+    .sendFile(`${Deno.cwd()}/examples/attain/static/index.html`);
 });
 app.get("/book", (req, res) => {
   res.status(200).send(Array.from(books.values()));
@@ -24,5 +24,5 @@ app.get("/book/:id", (req, res) => {
   }
 });
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

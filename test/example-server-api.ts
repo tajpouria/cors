@@ -7,14 +7,22 @@ export const exampleServerAPI = {
     return res;
   },
 
-  async getBooksResponse() {
-    const res = await fetch(`${EXAMPLE_SERVER_URL}/book`);
+  async getBooksResponse(reqInit: RequestInit = {}) {
+    const res = await fetch(`${EXAMPLE_SERVER_URL}/book`, reqInit);
     await res.text();
     return res;
   },
 
-  async getBookByIdResponse(id: number) {
+  async getBookByIdResponse(id = 1) {
     const res = await fetch(`${EXAMPLE_SERVER_URL}/book/${id}`);
+    await res.text();
+    return res;
+  },
+
+  async deleteBookById(id = 1) {
+    const res = await fetch(`${EXAMPLE_SERVER_URL}/book/${id}`, {
+      method: "DELETE",
+    });
     await res.text();
     return res;
   },

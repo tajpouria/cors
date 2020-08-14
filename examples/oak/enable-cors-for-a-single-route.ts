@@ -10,11 +10,11 @@ books.set("1", {
 
 const router = new Router();
 router
-  .get("/book", oakCors(), (context) => {
-    // Enable CORS for a Single Route
+  .get("/book", (context) => {
     context.response.body = Array.from(books.values());
   })
-  .get("/book/:id", (context) => {
+  // Enable CORS for a Single Route
+  .get("/book/:id", oakCors(), (context) => {
     if (context.params && context.params.id && books.has(context.params.id)) {
       context.response.body = books.get(context.params.id);
     }
@@ -23,5 +23,5 @@ router
 const app = new Application();
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

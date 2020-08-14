@@ -24,3 +24,5 @@ app
     abcCors(), // Enable CORS for a Single Route
   )
   .start({ port: 8000 });
+
+console.info("CORS-enabled web server listening on port 8000");

@@ -7,7 +7,7 @@ const sleep = (ms: number) =>
   });
 
 const loadOriginsFromDataBase = async () => {
-  await sleep(3000);
+  await sleep(100);
   return ["http://localhost:1234", "http://localhost:3000"];
 };
 
@@ -34,5 +34,5 @@ router.get("/book", oakCors(corsOptions), (context) => {
 const app = new Application();
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

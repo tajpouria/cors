@@ -1,4 +1,4 @@
-# cors
+# cors [![Actions Status](https://github.com/tajpouria/cors/workflows/ci/badge.svg)](https://github.com/tajpouria/cors/actions)
 
 CORS is a Deno.js module for providing a [Oak](https://github.com/oakserver/oak)/[Opine](https://github.com/asos-craigmorten/opine)/[Abc](https://github.com/zhmushan/abc)/[Attain](https://github.com/aaronwlee/Attain)/[Mith](https://github.com/jwebcoder/mith) middleware that can be used to enable [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) with various options.
 
@@ -48,7 +48,7 @@ const app = new Application();
 app.use(oakCors()); // Enable CORS for All Routes
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });
 ```
 
@@ -67,12 +67,12 @@ books.set("1", {
 
 const router = new Router();
 router
-  .get("/book", oakCors(), (context) => {
-    // Enable CORS for a Single Route
+  .get("/book", (context) => {
     context.response.body = Array.from(books.values());
   })
-  .get("/book/:id", (context) => {
-    if (context.params && context.params.id && books.has(context.params.id)) {
+  // Enable CORS for a Single Route
+  .get("/book/:id", oakCors(), (context) => {
+    if (context.params.id && books.has(context.params.id)) {
       context.response.body = books.get(context.params.id);
     }
   });
@@ -80,7 +80,7 @@ router
 const app = new Application();
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });
 ```
 
@@ -111,7 +111,7 @@ app.use(
 );
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });
 ```
 
@@ -167,7 +167,7 @@ router.get("/book", oakCors(corsOptions), (context) => {
 const app = new Application();
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });
 ```
 
@@ -218,7 +218,7 @@ router
 const app = new Application();
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });
 ```
 
@@ -258,15 +258,13 @@ const corsOptionsDelegate: CorsOptionsDelegate<Request> = async (request) => {
 
 const router = new Router();
 router.get("/book/:id", oakCors(corsOptionsDelegate), (context) => {
-  if (context.params && context.params.id && books.has(context.params.id)) {
-    context.response.body = books.get(context.params.id);
-  }
+  context.response.body = Array.from(books.values());
 });
 
 const app = new Application();
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });
 ```
 
@@ -302,9 +300,10 @@ The default configuration is the equivalent of:
 Document example can be found here:
 
 - [ Oak ](./examples/oak)
+- [ Opine ](./examples/opine)
 - [ Abc ](./examples/abc)
-- [ Mith ](./examples/mith)
 - [ Attain ](./examples/attain)
+- [ Mith ](./examples/mith)
 
 ## License
 

@@ -17,5 +17,5 @@ app.delete("/book/:id", attainCors(), (req, res) => {
   }
 });
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

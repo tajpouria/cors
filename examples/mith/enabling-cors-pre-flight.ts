@@ -1,5 +1,5 @@
-import { Mith } from "https://deno.land/x/mith@v0.1.1/mod.ts";
-import { Router } from "https://deno.land/x/mith_router@v0.0.6/mod.ts";
+import { Mith } from "https://deno.land/x/mith@v0.7.0/mod.ts";
+import { Router } from "https://deno.land/x/mith_router@v0.2.0/mod.ts";
 import { mithCors } from "../../mod.ts";
 
 const app = new Mith();
@@ -27,3 +27,4 @@ books.set("1", {
 app.use(router.getRoutes());
 
 app.listen({ port: 8000 });
+console.info("CORS-enabled web server listening on port 8000");

@@ -10,10 +10,12 @@ books.set("1", {
   author: "Mary Shelley",
 });
 
+console.info(`${Deno.cwd()}/examples/abc/static/index.html`);
+
 app
   .use(abcCors()) // Enable CORS for All Routes
-  .file("/", "./static/index.html")
-  .get("/book", (c) => {
+  .file("/index.html", "examples/abc/static/index.html")
+  .get("/book", () => {
     return Array.from(books);
   })
   .get("/book/:id", (c) => {
@@ -22,3 +24,5 @@ app
     }
   })
   .start({ port: 8000 });
+
+console.info("CORS-enabled web server listening on port 8000");

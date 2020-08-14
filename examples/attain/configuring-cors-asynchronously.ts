@@ -20,17 +20,15 @@ const corsOptionsDelegate: CorsOptionsDelegate<Request> = async (request) => {
     request.headers.get("origin") ?? "",
   );
 
-  await sleep(3000); // Simulate asynchronous task
+  await sleep(100); // Simulate asynchronous task
 
   return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
 
 const app = new App();
-app.get("/book/:id", attainCors(corsOptionsDelegate), (req, res) => {
-  if (req.params && req.params.id && books.has(req.params.id)) {
-    res.status(200).send(books.get(req.params.id));
-  }
+app.get("/book", attainCors(corsOptionsDelegate), (req, res) => {
+  res.status(200).send(Array.from(books.values()));
 });
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

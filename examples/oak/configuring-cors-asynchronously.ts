@@ -20,20 +20,18 @@ const corsOptionsDelegate: CorsOptionsDelegate<Request> = async (request) => {
     request.headers.get("origin") ?? "",
   );
 
-  await sleep(3000); // Simulate asynchronous task
+  await sleep(100); // Simulate asynchronous task
 
   return { origin: isOriginAllowed }; //  Reflect (enable) the requested origin in the CORS response if isOriginAllowed is true
 };
 
 const router = new Router();
-router.get("/book/:id", oakCors(corsOptionsDelegate), (context) => {
-  if (context.params && context.params.id && books.has(context.params.id)) {
-    context.response.body = books.get(context.params.id);
-  }
+router.get("/book", oakCors(corsOptionsDelegate), (context) => {
+  context.response.body = Array.from(books.values());
 });
 
 const app = new Application();
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

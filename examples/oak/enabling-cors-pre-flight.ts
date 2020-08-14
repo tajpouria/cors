@@ -21,5 +21,5 @@ router
 const app = new Application();
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

@@ -12,7 +12,7 @@ const router = new Router();
 router
   .get("/index.html", async (context) => {
     await send(context, context.request.url.pathname, {
-      root: `${Deno.cwd()}/static`,
+      root: `${Deno.cwd()}/examples/oak/static`,
       index: "index.html",
     });
   })
@@ -29,5 +29,5 @@ const app = new Application();
 app.use(oakCors()); // Enable CORS for All Routes
 app.use(router.routes());
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

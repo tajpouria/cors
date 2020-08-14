@@ -13,7 +13,7 @@ books.set("1", {
 app.use(opineCors()); // Enable CORS for All Routes
 
 app
-  .use(serveStatic("static"))
+  .use(serveStatic(`${Deno.cwd()}/examples/opine/static`))
   .get("/book", (_req, res) => {
     res.send(Array.from(books));
   })

@@ -1,5 +1,5 @@
-import { Mith } from "https://deno.land/x/mith@v0.1.1/mod.ts";
-import { Router } from "https://deno.land/x/mith_router@v0.0.6/mod.ts";
+import { Mith } from "https://deno.land/x/mith@v0.7.0/mod.ts";
+import { Router } from "https://deno.land/x/mith_router@v0.2.0/mod.ts";
 import { mithCors, CorsOptions } from "../../mod.ts";
 
 const sleep = (ms: number) =>
@@ -8,7 +8,7 @@ const sleep = (ms: number) =>
   });
 
 const loadOriginsFromDataBase = async () => {
-  await sleep(3000);
+  await sleep(100);
   return ["http://localhost:1234", "http://localhost:3000"];
 };
 
@@ -39,3 +39,4 @@ app.use(mithCors(corsOptions));
 app.use(router.getRoutes());
 
 app.listen({ port: 8000 });
+console.info("CORS-enabled web server listening on port 8000");

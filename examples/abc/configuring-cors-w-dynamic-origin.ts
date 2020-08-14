@@ -7,7 +7,7 @@ const sleep = (ms: number) =>
   });
 
 const loadOriginsFromDataBase = async () => {
-  await sleep(3000);
+  await sleep(100);
   return ["http://localhost:1234", "http://localhost:3000"];
 };
 
@@ -34,3 +34,5 @@ app
     return Array.from(books);
   })
   .start({ port: 8000 });
+
+console.info("CORS-enabled web server listening on port 8000");

@@ -9,15 +9,16 @@ books.set("1", {
 });
 
 const app = new App();
-app.get("/book", attainCors(), (req, res) => {
-  // Enable CORS for a Single Route
+app.get("/book", (req, res) => {
   res.status(200).send(Array.from(books.values()));
 });
-app.get("/book/:id", (req, res) => {
+
+// Enable CORS for a Single Route
+app.get("/book/:id", attainCors(), (req, res) => {
   if (req.params && req.params.id && books.has(req.params.id)) {
     res.status(200).send(books.get(req.params.id));
   }
 });
 
-console.info(`CORS-enabled web server listening on port 8000`);
+console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });

@@ -15,8 +15,8 @@ app
   .get("/book", (_req, res) => {
     res.send(Array.from(books));
   })
+  // Enable CORS for a Single Route
   .get("/book/:id", opineCors(), (req, res) => {
-    // Enable CORS for a Single Route
     if (req.params?.id && books.has(req.params.id)) {
       res.send(books.get(req.params.id));
     }
