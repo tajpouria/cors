@@ -31,5 +31,5 @@ jobs:
       - name: Test attainCors examples
         run: ./test/run.sh attain
 
-      - name: test mithCors examples
+      - name: Test mithCors examples
         run: ./test/run.sh mith
