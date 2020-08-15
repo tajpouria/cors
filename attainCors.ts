@@ -17,10 +17,15 @@ interface Res {
   send: (body: any) => any;
 }
 
+/**
+ * attainCors middleware wrapper
+ * @param o CorsOptions | CorsOptionsDelegate
+ * @link https://github.com/tajpouria/cors/blob/master/README.md#cors
+ */
 export const attainCors = <
   RequestT extends Req = any,
   ResponseT extends Res = any,
-  MiddlewareT extends (request: RequestT, response: ResponseT) => any = any,
+  MiddlewareT extends (request: RequestT, response: ResponseT) => any = any
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ) => {
