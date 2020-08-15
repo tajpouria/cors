@@ -7,7 +7,7 @@ interface Req {
     headers: {
       get(headerKey: string): string | null | undefined;
     };
-  }
+  };
 }
 
 interface Res {
@@ -39,7 +39,7 @@ export const mithCors = <
   >(o);
 
   return (async (request, response, next) => {
-    const serverRequest = request.serverRequest
+    const serverRequest = request.serverRequest;
     try {
       const options = await corsOptionsDelegate(request);
 
