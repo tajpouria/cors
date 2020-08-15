@@ -1,5 +1,5 @@
-import { Mith } from "https://deno.land/x/mith@v0.7.0/mod.ts";
-import { Router } from "https://deno.land/x/mith_router@v0.2.0/mod.ts";
+import { Mith } from "https://deno.land/x/mith@v0.9.4/mod.ts";
+import { Router } from "https://deno.land/x/mith_router@v0.5.0/mod.ts";
 import { mithCors } from "../../mod.ts";
 
 const app = new Mith();
