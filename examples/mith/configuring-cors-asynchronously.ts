@@ -1,5 +1,5 @@
-import { Mith } from "https://deno.land/x/mith@v0.7.0/mod.ts";
-import { Router } from "https://deno.land/x/mith_router@v0.2.0/mod.ts";
+import { Mith } from "https://deno.land/x/mith@v0.9.4/mod.ts";
+import { Router } from "https://deno.land/x/mith_router@v0.5.0/mod.ts";
 import { mithCors, CorsOptionsDelegate } from "../../mod.ts";
 
 const sleep = (ms: number) =>
@@ -26,7 +26,7 @@ const whitelist = ["http://localhost:1234", "http://localhost:3000"];
 
 const corsOptionsDelegate: CorsOptionsDelegate = async (request) => {
   const isOriginAllowed = whitelist.includes(
-    request.headers.get("origin") ?? "",
+    request.serverRequest.headers.get("origin") ?? "",
   );
 
   await sleep(100); // Simulate asynchronous task
