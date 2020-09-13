@@ -1,6 +1,6 @@
 # cors
 
-[![Actions Status](https://github.com/tajpouria/cors/workflows/ci/badge.svg)](https://github.com/tajpouria/cors/actions) [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/cors/mod.ts)
+[![Actions Status](https://github.com/tajpouria/cors/workflows/ci/badge.svg)](https://github.com/tajpouria/cors/actions) [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/cors/mod.ts) [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/cors)
 
 CORS is a Deno.js module for providing a [Oak](https://github.com/oakserver/oak)/[Opine](https://github.com/asos-craigmorten/opine)/[Abc](https://github.com/zhmushan/abc)/[Attain](https://github.com/aaronwlee/Attain)/[Mith](https://github.com/jwebcoder/mith) middleware that can be used to enable [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) with various options.
 

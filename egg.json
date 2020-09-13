@@ -1,0 +1,10 @@
+{
+  "name": "cors",
+  "description": "Deno.js CORS middleware",
+  "version": "1.2.0",
+  "entry": "./mod.ts",
+  "stable": true,
+  "fmt": true,
+  "repository": "https://github.com/tajpouria/cors",
+  "files": ["./*.ts", "./examples", "./README.md", "./LICENSE"]
+}
