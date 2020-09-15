@@ -1,4 +1,4 @@
-import { CorsOptions, CorsOptionsDelegate } from "./types.ts";
+import type { CorsOptions, CorsOptionsDelegate } from "./types.ts";
 import { Cors } from "./cors.ts";
 
 interface Req {
