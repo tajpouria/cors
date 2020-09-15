@@ -1,4 +1,8 @@
-import type { CorsOptions, OriginDelegate, CorsOptionsDelegate } from "./types.ts";
+import type {
+  CorsOptions,
+  OriginDelegate,
+  CorsOptionsDelegate,
+} from "./types.ts";
 
 interface DefaultCorsOptions {
   origin: string;
