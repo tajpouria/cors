@@ -19,17 +19,17 @@ jobs:
       - name: Check format
         run: deno fmt --check
 
-        #- name: Test oakCors examples
-        #run: ./test/run.sh oak
+        - name: Test oakCors examples
+        run: ./test/run.sh oak
 
-        #- name: Test opineCors examples
-        #run: ./test/run.sh opine
+        - name: Test opineCors examples
+        run: ./test/run.sh opine
 
       - name: Test abcCors examples
         run: ./test/run.sh abc
 
-        #- name: Test attainCors examples
-        #run: ./test/run.sh attain
+      - name: Test attainCors examples
+        run: ./test/run.sh attain
 
         #- name: Test mithCors examples
         #run: ./test/run.sh mith
