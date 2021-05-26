@@ -1,7 +1,7 @@
 import type {
   CorsOptions,
-  OriginDelegate,
   CorsOptionsDelegate,
+  OriginDelegate,
 } from "./types.ts";
 
 interface DefaultCorsOptions {
@@ -19,6 +19,7 @@ interface CorsProps {
   setResponseHeader: (headerKey: string, headerValue: string) => any;
   setStatus: (statusCode: number) => any;
   next: (...args: any) => any;
+  end: (...args: any) => any;
 }
 
 export class Cors {
@@ -78,7 +79,14 @@ export class Cors {
 
   public configureHeaders = () => {
     const {
-      props: { corsOptions, requestMethod, setResponseHeader, setStatus, next },
+      props: {
+        corsOptions,
+        requestMethod,
+        setResponseHeader,
+        setStatus,
+        next,
+        end,
+      },
       configureOrigin,
     } = this;
 
@@ -97,7 +105,7 @@ export class Cors {
       else {
         setStatus(corsOptions.optionsSuccessStatus);
         setResponseHeader("Content-Length", "0");
-        return next();
+        return end();
       }
     } else {
       configureOrigin().configureCredentials().configureExposedHeaders();

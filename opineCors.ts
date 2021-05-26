@@ -12,6 +12,7 @@ interface Res {
   setStatus(code: any): this;
   set(headerKey: string, headerValue: string): this;
   get(headerKey: string): string | null | undefined;
+  end(...args: any): any;
 }
 
 /**
@@ -51,6 +52,7 @@ export const opineCors = <
           response.set(headerKey, headerValue);
         const setStatus = (statusCode: number) =>
           response.setStatus(statusCode);
+        const end = () => response.end();
 
         const origin = await originDelegate(getRequestHeader("origin"));
 
@@ -66,6 +68,7 @@ export const opineCors = <
             setResponseHeader,
             setStatus,
             next,
+            end,
           }).configureHeaders();
         }
       }

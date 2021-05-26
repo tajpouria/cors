@@ -1,5 +1,5 @@
 import { opine } from "https://deno.land/x/opine/mod.ts";
-import { opineCors, CorsOptionsDelegate } from "../../mod.ts";
+import { CorsOptionsDelegate, opineCors } from "../../mod.ts";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {

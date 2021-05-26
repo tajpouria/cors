@@ -1,6 +1,6 @@
 import { Mith } from "https://deno.land/x/mith@v0.9.4/mod.ts";
 import { Router } from "https://deno.land/x/mith_router@v0.5.0/mod.ts";
-import { mithCors, CorsOptions } from "../../mod.ts";
+import { CorsOptions, mithCors } from "../../mod.ts";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
