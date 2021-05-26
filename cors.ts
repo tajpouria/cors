@@ -97,7 +97,7 @@ export class Cors {
       else {
         setStatus(corsOptions.optionsSuccessStatus);
         setResponseHeader("Content-Length", "0");
-        return next();
+        return;
       }
     } else {
       configureOrigin().configureCredentials().configureExposedHeaders();
