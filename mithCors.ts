@@ -57,6 +57,7 @@ export const mithCors = <
         const setStatus = (
           statusCode: number,
         ) => (response.status = statusCode);
+        const end = () => {};
 
         const origin = await originDelegate(getRequestHeader("origin"));
 
@@ -72,6 +73,7 @@ export const mithCors = <
             setResponseHeader,
             setStatus,
             next,
+            end,
           }).configureHeaders();
         }
       }
