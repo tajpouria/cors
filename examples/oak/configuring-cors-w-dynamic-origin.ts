@@ -1,5 +1,5 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { oakCors, CorsOptions } from "../../mod.ts";
+import { CorsOptions, oakCors } from "../../mod.ts";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {

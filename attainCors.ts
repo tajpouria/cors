@@ -15,6 +15,7 @@ interface Res {
     set(headerKey: string, headerValue: string): any;
   };
   send: (body: any) => any;
+  end(...args: any): any;
 }
 
 /**
@@ -50,6 +51,7 @@ export const attainCors = <
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
         const setStatus = (statusCode: number) => response.status(statusCode);
+        const end = response.end();
 
         const origin = await originDelegate(getRequestHeader("origin"));
 
@@ -64,6 +66,7 @@ export const attainCors = <
             setResponseHeader,
             setStatus,
             next: fakeNext,
+            end,
           }).configureHeaders();
         }
       }
