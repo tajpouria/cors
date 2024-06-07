@@ -26,14 +26,13 @@ export const oakCors = <
   ResponseT extends Res = any,
   MiddlewareT extends (
     context: { request: RequestT; response: ResponseT },
-    next: (...args: any) => any,
-  ) => any = any,
+    next: (...args: any) => any
+  ) => any = any
 >(
-  o?: CorsOptions | CorsOptionsDelegate<RequestT>,
-) => {
-  const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
-    CorsOptionsDelegate<RequestT>
-  >(o);
+  o?: CorsOptions | CorsOptionsDelegate<RequestT>
+): MiddlewareT => {
+  const corsOptionsDelegate =
+    Cors.produceCorsOptionsDelegate<CorsOptionsDelegate<RequestT>>(o);
 
   return (async ({ request, response }, next) => {
     try {
@@ -50,9 +49,8 @@ export const oakCors = <
           response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
-        const setStatus = (
-          statusCode: number,
-        ) => (response.status = statusCode);
+        const setStatus = (statusCode: number) =>
+          (response.status = statusCode);
         const end = () => {};
 
         const origin = await originDelegate(getRequestHeader("origin"));

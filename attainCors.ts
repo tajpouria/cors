@@ -26,13 +26,12 @@ interface Res {
 export const attainCors = <
   RequestT extends Req = any,
   ResponseT extends Res = any,
-  MiddlewareT extends (request: RequestT, response: ResponseT) => any = any,
+  MiddlewareT extends (request: RequestT, response: ResponseT) => any = any
 >(
-  o?: CorsOptions | CorsOptionsDelegate<RequestT>,
-) => {
-  const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
-    CorsOptionsDelegate<RequestT>
-  >(o);
+  o?: CorsOptions | CorsOptionsDelegate<RequestT>
+): MiddlewareT => {
+  const corsOptionsDelegate =
+    Cors.produceCorsOptionsDelegate<CorsOptionsDelegate<RequestT>>(o);
 
   return async function cors(request, response) {
     try {
