@@ -1,6 +1,5 @@
 # cors
 
-[![Actions Status](https://github.com/tajpouria/cors/workflows/ci/badge.svg)](https://github.com/tajpouria/cors/actions)
 [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/cors/mod.ts)
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/cors)
 [![JSR](https://jsr.io/badges/@tajpouria/cors)](https://jsr.io/@tajpouria/cors)
