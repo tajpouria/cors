@@ -75,7 +75,6 @@ export type CorsOptions = {
    *  }));
    *
    * ```
-   *
    */
   origin?: boolean | string | RegExp | (string | RegExp)[] | OriginDelegate;
 
@@ -101,7 +100,6 @@ export type CorsOptions = {
    * app.use(cors({ methods: ['GET', 'PUT', 'POST'] }));
    *
    * ```
-   *
    */
   methods?: string | string[];
 
@@ -127,7 +125,6 @@ export type CorsOptions = {
    * app.use(cors({ allowedHeaders: ['Content-Type', 'Authorization'] }));
    *
    * ```
-   *
    */
   allowedHeaders?: string | string[];
 
@@ -144,7 +141,6 @@ export type CorsOptions = {
    * app.use(cors({ exposedHeaders: 'Content-Range,X-Content-Range' }));
    *
    * ```
-   *
    */
   exposedHeaders?: string | string[];
 
@@ -161,7 +157,6 @@ export type CorsOptions = {
    * app.use(cors({ credentials: true }));
    *
    * ```
-   *
    */
   credentials?: boolean;
 
@@ -178,7 +173,6 @@ export type CorsOptions = {
    * app.use(cors({ maxAge: 1 }));
    *
    * ```
-   *
    */
   maxAge?: number;
 
@@ -193,7 +187,6 @@ export type CorsOptions = {
    * app.use(cors({ preflightContinue: true }));
    *
    * ```
-   *
    */
   preflightContinue?: boolean;
 
@@ -208,7 +201,6 @@ export type CorsOptions = {
    * app.use(cors({ optionsSuccessStatus: 200 }));
    *
    * ```
-   *
    */
   optionsSuccessStatus?: number;
 };

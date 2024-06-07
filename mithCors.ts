@@ -29,13 +29,14 @@ export const mithCors = <
   MiddlewareT extends (
     request: RequestT,
     response: ResponseT,
-    next: (...args: any) => any
-  ) => any = any
+    next: (...args: any) => any,
+  ) => any = any,
 >(
-  o?: CorsOptions | CorsOptionsDelegate<RequestT>
+  o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ): MiddlewareT => {
-  const corsOptionsDelegate =
-    Cors.produceCorsOptionsDelegate<CorsOptionsDelegate<RequestT>>(o);
+  const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
+    CorsOptionsDelegate<RequestT>
+  >(o);
 
   return (async (request, response, next) => {
     const serverRequest = request.serverRequest;
@@ -53,8 +54,9 @@ export const mithCors = <
           response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
-        const setStatus = (statusCode: number) =>
-          (response.status = statusCode);
+        const setStatus = (
+          statusCode: number,
+        ) => (response.status = statusCode);
         const end = () => {};
 
         const origin = await originDelegate(getRequestHeader("origin"));

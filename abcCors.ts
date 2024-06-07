@@ -25,13 +25,14 @@ export const abcCors = <
   RequestT extends Req = any,
   ResponseT extends Res = any,
   MiddlewareT extends (
-    next: (...args: any) => any
-  ) => (context: { request: RequestT; response: ResponseT }) => any = any
+    next: (...args: any) => any,
+  ) => (context: { request: RequestT; response: ResponseT }) => any = any,
 >(
-  o?: CorsOptions | CorsOptionsDelegate<RequestT>
+  o?: CorsOptions | CorsOptionsDelegate<RequestT>,
 ): MiddlewareT => {
-  const corsOptionsDelegate =
-    Cors.produceCorsOptionsDelegate<CorsOptionsDelegate<RequestT>>(o);
+  const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
+    CorsOptionsDelegate<RequestT>
+  >(o);
 
   return ((abcNext) => async (context) => {
     const next = () => abcNext(context);
@@ -52,8 +53,9 @@ export const abcCors = <
           response.headers.get(headerKey);
         const setResponseHeader = (headerKey: string, headerValue: string) =>
           response.headers.set(headerKey, headerValue);
-        const setStatus = (statusCode: number) =>
-          (response.status = statusCode);
+        const setStatus = (
+          statusCode: number,
+        ) => (response.status = statusCode);
         const end = () => {};
 
         const origin = await originDelegate(getRequestHeader("origin"));
