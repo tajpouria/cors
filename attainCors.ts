@@ -29,7 +29,7 @@ export const attainCors = <
   MiddlewareT extends (request: RequestT, response: ResponseT) => any = any,
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
-) => {
+): MiddlewareT => {
   const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
     CorsOptionsDelegate<RequestT>
   >(o);

@@ -30,7 +30,7 @@ export const oakCors = <
   ) => any = any,
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
-) => {
+): MiddlewareT => {
   const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
     CorsOptionsDelegate<RequestT>
   >(o);

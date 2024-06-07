@@ -29,58 +29,57 @@ export const abcCors = <
   ) => (context: { request: RequestT; response: ResponseT }) => any = any,
 >(
   o?: CorsOptions | CorsOptionsDelegate<RequestT>,
-) => {
+): MiddlewareT => {
   const corsOptionsDelegate = Cors.produceCorsOptionsDelegate<
     CorsOptionsDelegate<RequestT>
   >(o);
 
-  return ((abcNext) =>
-    async (context) => {
-      const next = () => abcNext(context);
+  return ((abcNext) => async (context) => {
+    const next = () => abcNext(context);
 
-      try {
-        const { request, response } = context;
+    try {
+      const { request, response } = context;
 
-        const options = await corsOptionsDelegate(request);
+      const options = await corsOptionsDelegate(request);
 
-        const corsOptions = Cors.produceCorsOptions(options || {});
-        const originDelegate = Cors.produceOriginDelegate(corsOptions);
+      const corsOptions = Cors.produceCorsOptions(options || {});
+      const originDelegate = Cors.produceOriginDelegate(corsOptions);
 
-        if (originDelegate) {
-          const requestMethod = request.method;
-          const getRequestHeader = (headerKey: string) =>
-            request.headers.get(headerKey);
-          const getResponseHeader = (headerKey: string) =>
-            response.headers.get(headerKey);
-          const setResponseHeader = (headerKey: string, headerValue: string) =>
-            response.headers.set(headerKey, headerValue);
-          const setStatus = (
-            statusCode: number,
-          ) => (response.status = statusCode);
-          const end = () => {};
+      if (originDelegate) {
+        const requestMethod = request.method;
+        const getRequestHeader = (headerKey: string) =>
+          request.headers.get(headerKey);
+        const getResponseHeader = (headerKey: string) =>
+          response.headers.get(headerKey);
+        const setResponseHeader = (headerKey: string, headerValue: string) =>
+          response.headers.set(headerKey, headerValue);
+        const setStatus = (
+          statusCode: number,
+        ) => (response.status = statusCode);
+        const end = () => {};
 
-          const origin = await originDelegate(getRequestHeader("origin"));
+        const origin = await originDelegate(getRequestHeader("origin"));
 
-          if (!origin) return next();
-          else {
-            corsOptions.origin = origin;
+        if (!origin) return next();
+        else {
+          corsOptions.origin = origin;
 
-            return new Cors({
-              corsOptions,
-              requestMethod,
-              getRequestHeader,
-              getResponseHeader,
-              setResponseHeader,
-              setStatus,
-              next,
-              end,
-            }).configureHeaders();
-          }
+          return new Cors({
+            corsOptions,
+            requestMethod,
+            getRequestHeader,
+            getResponseHeader,
+            setResponseHeader,
+            setStatus,
+            next,
+            end,
+          }).configureHeaders();
         }
-      } catch (error) {
-        console.error(error);
       }
+    } catch (error) {
+      console.error(error);
+    }
 
-      return next();
-    }) as MiddlewareT;
+    return next();
+  }) as MiddlewareT;
 };
