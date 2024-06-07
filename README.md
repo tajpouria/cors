@@ -3,6 +3,7 @@
 [![Actions Status](https://github.com/tajpouria/cors/workflows/ci/badge.svg)](https://github.com/tajpouria/cors/actions)
 [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/cors/mod.ts)
 [![nest badge](https://nest.land/badge.svg)](https://nest.land/package/cors)
+[![JSR](https://jsr.io/badges/@tajpouria/cors)](https://jsr.io/@tajpouria/cors)
 
 CORS is a Deno.js module for providing a
 [Oak](https://github.com/oakserver/oak)/[Opine](https://github.com/asos-craigmorten/opine)/[Abc](https://github.com/zhmushan/abc)/[Attain](https://github.com/aaronwlee/Attain)/[Mith](https://github.com/jwebcoder/mith)
@@ -115,7 +116,7 @@ app.use(
   oakCors({
     origin: /^.+localhost:(1234|3000)$/,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  }),
+  })
 );
 app.use(router.routes());
 
@@ -256,7 +257,7 @@ const whitelist = ["http://localhost:1234", "http://localhost:3000"];
 
 const corsOptionsDelegate: CorsOptionsDelegate<Request> = async (request) => {
   const isOriginAllowed = whitelist.includes(
-    request.headers.get("origin") ?? "",
+    request.headers.get("origin") ?? ""
   );
 
   await sleep(3000); // Simulate asynchronous task
